@@ -17,10 +17,10 @@ from webargs.fields import (
 )
 from webargs import validate
 from nv.models import (
-    Subforum,
+    Topic,
 )
 from nv.serializers import (
-    SubforumSchema,
+    TopicSchema,
 )
 from nv.util import (
     mk_errors,
@@ -29,10 +29,10 @@ from nv.database import db
 from nv import config
 
 
-class SubforumsRes(Resource):
+class TopicsRes(Resource):
     def get(self):
-        subforums = Subforum.query.all()
-        data = SubforumSchema(many=True).dump(subforums)
+        topics = Topic.query.all()
+        data = TopicSchema(many=True).dump(topics)
         obj = {
             'data': data,
             'offset': None,

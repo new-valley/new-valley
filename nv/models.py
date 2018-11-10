@@ -76,6 +76,24 @@ class Subforum(Base):
     position = Column(Integer, unique=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    topics = relationship('Topic', backref='subforum', lazy=True)
+
+
+TOPIC_STATUSES = {
+    'published',
+    'unpublished',
+    'locked',
+}
+
+class Topic(Base):
+    __tablename__ = 'topics'
+    topic_id = Column(Integer, primary_key=True)
+    title = Column(String(128), unique=True, nullable=False)
+    status = Column(String(128), nullable=False, default='published')
+    subforum_id = Column(
+        Integer, ForeignKey('subforums.subforum_id'), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
 class RevokedToken(Base):

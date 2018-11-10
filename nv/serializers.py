@@ -23,6 +23,7 @@ from nv.models import (
     Avatar,
     User,
     Subforum,
+    Topic,
 )
 
 
@@ -74,4 +75,19 @@ class SubforumSchema(ModelSchema):
     class Meta:
         unknown = EXCLUDE
         model = Subforum
+        sqla_session = db.session
+
+
+class TopicSchema(ModelSchema):
+    topic_id = field_for(Topic, 'topic_id', dump_only=True)
+    title = field_for(Topic, 'title', required=True)
+    status = field_for(Topic, 'status', required=True)
+    subforum = Nested(
+        SubforumSchema, many=False, dump_only=True, exclude=['topics'])
+    created_at = field_for(Topic, 'created_at', dump_only=True)
+    updated_at = field_for(Topic, 'updated_at', dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
+        model = Topic
         sqla_session = db.session
