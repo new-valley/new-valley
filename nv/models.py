@@ -68,6 +68,16 @@ class User(Base):
         return super().create_and_save(**kwargs)
 
 
+class Subforum(Base):
+    __tablename__ = 'subforums'
+    subforum_id = Column(Integer, primary_key=True)
+    title = Column(String(64), unique=True, nullable=False)
+    description = Column(String(128), nullable=False)
+    position = Column(Integer, unique=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
 class RevokedToken(Base):
     __tablename__ = 'revoked_tokens'
     revoked_token_id = Column(Integer, primary_key=True)

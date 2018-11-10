@@ -22,6 +22,7 @@ from nv.database import db
 from nv.models import (
     Avatar,
     User,
+    Subforum,
 )
 
 
@@ -62,3 +63,15 @@ class UserSchema(ModelSchema):
         exclude = ['password', 'updated_at']
 
     
+class SubforumSchema(ModelSchema):
+    subforum_id = field_for(Subforum, 'subforum_id', dump_only=True)
+    title = field_for(Subforum, 'title', required=True)
+    description = field_for(Subforum, 'description', required=True)
+    position = field_for(Subforum, 'position', required=True)
+    created_at = field_for(Subforum, 'created_at', dump_only=True)
+    updated_at = field_for(Subforum, 'updated_at', dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
+        model = Subforum
+        sqla_session = db.session
