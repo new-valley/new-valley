@@ -13,10 +13,13 @@ from nv.resources import (
     subforums,
     topics,
     posts,
+    avatars,
 )
 api = Api(prefix='/api')
 #test
 api.add_resource(test.Test, '/test')
+#avatars
+api.add_resource(avatars.AvatarsRes, '/avatars')
 #users
 api.add_resource(users.UsersRes, '/users')
 api.add_resource(users.UserRes, '/users/<int:user_id>')

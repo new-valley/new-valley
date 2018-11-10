@@ -41,6 +41,7 @@ class AvatarSchema(ModelSchema):
         unknown = EXCLUDE
         model = Avatar
         sqla_session = db.session
+        exclude = ['users']
 
 
 class UserSchema(ModelSchema):
@@ -56,7 +57,7 @@ class UserSchema(ModelSchema):
         AvatarSchema, many=False, exclude=['users'], dump_only=True)
     signature = field_for(User, 'signature', required=True)
     created_at = field_for(User, 'created_at', dump_only=True)
-    #updated_at = field_for(User, 'updated_at', dump_only=True)
+    updated_at = field_for(User, 'updated_at', dump_only=True)
 
     def split_roles_by_commas(self, obj):
         roles = [r.strip() for r in obj.roles.split(',') if r.strip()]
@@ -66,7 +67,7 @@ class UserSchema(ModelSchema):
         unknown = EXCLUDE
         model = User
         sqla_session = db.session
-        exclude = ['updated_at', 'posts']
+        exclude = ['posts']
 
     
 class SubforumSchema(ModelSchema):
