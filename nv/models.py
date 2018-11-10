@@ -10,42 +10,68 @@ Table = db.Table
 ForeignKey = db.ForeignKey
 func = db.func
 relationship = db.relationship
-Base = db.Model
+#Base = db.Model
 Table = db.Table
 
+class Base(db.Model):
+    __abstract__ = True
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def create_and_save(cls, **kwargs):
+        obj = cls(**kwargs)
+        obj.save()
+        return obj
+
+
+class Avatar(Base):
+    __tablename__ = 'avatars'
+    avatar_id = Column(Integer, primary_key=True)
+    uri = Column(String(256), nullable=False)
+    category = Column(String(128), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    users = relationship('User', backref='avatar', lazy=True)
+
+
+USER_STATUSES = {
+    'active',
+    'banned',
+    'kicked',
+}
+
+USER_ROLES = {
+    'user',
+    'moderator',
+}
 
 class User(Base):
     __tablename__ = 'users'
     user_id = Column(Integer, primary_key=True)
     username = Column(String(128), unique=True, nullable=False)
+    email = Column(String(128), unique=True, nullable=False)
     password = Column(String(128), nullable=False)
+    roles = Column(String(256), nullable=False, default='user')
+    status = Column(String(128), nullable=False, default='active')
+    avatar_id = Column(
+        Integer, ForeignKey('avatars.avatar_id'), nullable=False)
+    signature = Column(String(1024), nullable=False, default='')
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+    @classmethod
+    def create_and_save(cls, **kwargs):
+        kwargs['password'] = generate_hash(kwargs['password'])
+        return super().create_and_save(**kwargs)
 
-    def to_json(self):
-        return {
-            'user_id': self.user_id,
-            'username': str(self.username),
-            'password': str(self.password),
-        }
-
-    @staticmethod
-    def create_and_save(username, plain_password):
-        new_user = User(username=username,
-            password=generate_hash(plain_password))
-        new_user.save()
-        return new_user
 
 class RevokedToken(Base):
     __tablename__ = 'revoked_tokens'
     revoked_token_id = Column(Integer, primary_key=True)
     jti = Column(String(120))
-
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
 
     @classmethod
     def is_jti_blacklisted(cls, jti):

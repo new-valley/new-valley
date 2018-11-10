@@ -4,6 +4,12 @@ import argparse
 import getpass
 
 from nv.app import get_app
+from nv import config
+from nv.database import db
+from nv.models import (
+    User,
+    Avatar,
+)
 
 def get_pass(prompt, max_n_trials=3):
     for i in range(max_n_trials):
@@ -36,6 +42,13 @@ def reset_db(app):
     drop_db_tables(app)
     create_db_tables(app)
 
+def create_avatar(app):
+    with app.app_context():
+        Avatar.create_and_save(
+            uri='http://example.com/img.jpg',
+            category='games',
+        )
+
 def create_su(app, passwd=''):
     if not passwd:
         passwd = get_pass('enter superuser password: ')
@@ -43,7 +56,17 @@ def create_su(app, passwd=''):
         raise ValueError(
             'length of password < {}'.format(config.min_password_len))
     with app.app_context():
-        User.create_and_save('su', passwd)
+        create_avatar(app)
+        avatar = Avatar.query.get(1)
+        User.create_and_save(
+            username='su',
+            password=passwd,
+            email='su@nv.com',
+            signature='usuario banido, abracos',
+            avatar=avatar,
+            roles='user, moderator',
+            #avatar_id=avatar.avatar_id,
+        )
 
 def main():
     parser = argparse.ArgumentParser()

@@ -5,6 +5,13 @@ from flask import (
 
 from passlib.hash import pbkdf2_sha256 as sha256
 
+def envelope(fn, key='data'):
+    def wrapper(*args, **kwargs):
+        ret = fn(*args, **kwargs)
+        ret = {key: ret}
+        return ret
+    return wrapper
+
 def generate_hash(password):
     return sha256.hash(password)
 
