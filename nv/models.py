@@ -64,7 +64,7 @@ class User(Base):
     posts = relationship('Post', backref='user', lazy=True)
 
     def __init__(self, **kwargs):
-        #kwargs['password'] = generate_hash(kwargs['password'])
+        kwargs['password'] = generate_hash(kwargs['password'])
         super().__init__(**kwargs)
 
 

@@ -27,15 +27,15 @@ from nv.util import (
 )
 from nv.database import db
 from nv import config
+from nv.resources import common
 
 
 class SubforumsRes(Resource):
     def get(self):
-        subforums = Subforum.query.all()
-        data = SubforumSchema(many=True).dump(subforums)
-        obj = {
-            'data': data,
-            'offset': None,
-            'total': len(data),
-        }
-        return obj
+        args = common.parse_get_coll_args(request)
+        objs = common.get_coll(
+            full_query=Subforum.query,
+            schema=SubforumSchema(many=True),
+            **args,
+        )
+        return objs

@@ -27,15 +27,15 @@ from nv.util import (
 )
 from nv.database import db
 from nv import config
+from nv.resources import common
 
 
 class AvatarsRes(Resource):
     def get(self):
-        avatars = Avatar.query.all()
-        data = AvatarSchema(many=True).dump(avatars)
-        obj = {
-            'data': data,
-            'offset': None,
-            'total': len(data),
-        }
-        return obj
+        args = common.parse_get_coll_args(request)
+        objs = common.get_coll(
+            full_query=Avatar.query,
+            schema=AvatarSchema(many=True),
+            **args,
+        )
+        return objs

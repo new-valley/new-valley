@@ -27,15 +27,15 @@ from nv.util import (
 )
 from nv.database import db
 from nv import config
+from nv.resources import common
 
 
 class TopicsRes(Resource):
     def get(self):
-        topics = Topic.query.all()
-        data = TopicSchema(many=True).dump(topics)
-        obj = {
-            'data': data,
-            'offset': None,
-            'total': len(data),
-        }
-        return obj
+        args = common.parse_get_coll_args(request)
+        objs = common.get_coll(
+            full_query=Topic.query,
+            schema=TopicSchema(many=True),
+            **args,
+        )
+        return objs

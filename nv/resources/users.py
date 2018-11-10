@@ -25,6 +25,7 @@ from nv.serializers import (
 from nv.util import (
     mk_errors,
 )
+from nv.resources import common
 from nv.database import db
 from nv import config
 
@@ -46,14 +47,13 @@ _USER_PASS_ARGS = {
 class UsersRes(Resource):
     #@jwt_required
     def get(self):
-        users = User.query.all()
-        data = UserSchema(many=True).dump(users)
-        obj = {
-            'data': data,
-            'offset': None,
-            'total': len(users),
-        }
-        return obj
+        args = common.parse_get_coll_args(request)
+        objs = common.get_coll(
+            full_query=User.query,
+            schema=UserSchema(many=True),
+            **args,
+        )
+        return objs
 
     #@jwt_required
     def post(self):

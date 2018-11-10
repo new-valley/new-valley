@@ -27,15 +27,15 @@ from nv.util import (
 )
 from nv.database import db
 from nv import config
+from nv.resources import common
 
 
 class PostsRes(Resource):
     def get(self):
-        posts = Post.query.all()
-        data = PostSchema(many=True).dump(posts)
-        obj = {
-            'data': data,
-            'offset': None,
-            'total': len(data),
-        }
-        return obj
+        args = common.parse_get_coll_args(request)
+        objs = common.get_coll(
+            full_query=Post.query,
+            schema=PostSchema(many=True),
+            **args,
+        )
+        return objs

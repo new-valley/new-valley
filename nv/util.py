@@ -24,7 +24,7 @@ def _filter_fields(objs, fields):
         return {k: v for k, v in objs.items() if k in fields}
     return [{k: v for k, v in obj.items() if k in fields} for obj in objs]
 
-def filter_fields(objs, fields=None, enveloped=True):
+def filter_fields(objs, fields=None, enveloped=False):
     if fields is None:
         return objs
     if enveloped:
