@@ -1,0 +1,10 @@
+newvalley_api:
+    #build: .
+    image: newvalley
+    ports:
+        - "5000:5000"
+    #edit these paths to map to your local volumes
+    volumes:
+        - /home/erik/rand/db_dev:/tmp
+        - /home/erik/rand/db:/db
+    command: /app/run_server.sh
