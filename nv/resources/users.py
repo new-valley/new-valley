@@ -93,5 +93,3 @@ class UserRes(Resource):
         db.session.delete(user)
         db.session.commit()
         return '', 204
-
-

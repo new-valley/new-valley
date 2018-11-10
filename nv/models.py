@@ -61,7 +61,7 @@ class User(Base):
     signature = Column(String(1024), nullable=False, default='')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    posts = relationship('Post', backref='user', lazy=True)
+    posts = relationship('Post', backref='user', lazy=True, cascade='delete')
 
     def __init__(self, **kwargs):
         kwargs['password'] = generate_hash(kwargs['password'])
@@ -76,7 +76,8 @@ class Subforum(Base):
     position = Column(Integer, unique=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    topics = relationship('Topic', backref='subforum', lazy=True)
+    topics = relationship(
+        'Topic', backref='subforum', lazy=True, cascade='delete')
 
 
 TOPIC_STATUSES = {
@@ -94,7 +95,7 @@ class Topic(Base):
         Integer, ForeignKey('subforums.subforum_id'), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    posts = relationship('Post', backref='topic', lazy=True)
+    posts = relationship('Post', backref='topic', lazy=True, cascade='delete')
 
 
 POST_STATUSES = {
