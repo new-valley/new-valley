@@ -63,10 +63,9 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     posts = relationship('Post', backref='user', lazy=True)
 
-    @classmethod
-    def create_and_save(cls, **kwargs):
-        kwargs['password'] = generate_hash(kwargs['password'])
-        return super().create_and_save(**kwargs)
+    def __init__(self, **kwargs):
+        #kwargs['password'] = generate_hash(kwargs['password'])
+        super().__init__(**kwargs)
 
 
 class Subforum(Base):
@@ -89,7 +88,7 @@ TOPIC_STATUSES = {
 class Topic(Base):
     __tablename__ = 'topics'
     topic_id = Column(Integer, primary_key=True)
-    title = Column(String(128), unique=True, nullable=False)
+    title = Column(String(128), nullable=False)
     status = Column(String(64), nullable=False, default='published')
     subforum_id = Column(
         Integer, ForeignKey('subforums.subforum_id'), nullable=False)

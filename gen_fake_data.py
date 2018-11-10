@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import random
-from passlib.hash import pbkdf2_sha256 as sha256
 import datetime as dt
 import uuid
 import json
@@ -104,9 +103,6 @@ AVATAR_CATEGORIES = [
     'jovem',
 ]
 
-def generate_hash(password):
-    return sha256.hash(password)
-
 def sample(lst, n):
     return random.sample(lst, min(len(lst), n))
 
@@ -129,7 +125,7 @@ def get_rand_email():
     email = '{}@{}.com'.format(get_rand_str(), get_rand_str()[:tail])
     return email
 
-_IDS = set()
+_IDS = {1}
 def get_rand_id():
     while True:
         uid = random.randint(0, 1000000)
@@ -166,25 +162,31 @@ def get_rand_avatar(**kwargs):
     return dct
 
 def get_rand_user(**kwargs):
+    avatar = get_rand_avatar()
     dct =  add_datetimes({
         'user_id': get_rand_id(),
         'username': choice(USERNAMES) + salt(),
-        'roles': sample(USER_ROLES, random.randint(0, len(USER_ROLES))),
+        'roles': ', '.join(
+            sample(USER_ROLES, random.randint(0, len(USER_ROLES)))),
         'status': choice(USER_STATUSES),
-        'avatar': get_rand_avatar(),
+        'avatar': avatar,
+        'avatar_id': avatar['avatar_id'],
         'signature': choice(SIGNATURES) + prob(0.75)*salt(),
         'email': get_rand_email(),
-        'password': generate_hash(get_rand_str()),
+        'password': get_rand_str(),
     })
     dct.update(**kwargs)
     return dct
 
+_POSITION = 0
 def get_rand_subforum(**kwargs):
+    global _POSITION
+    _POSITION += random.randint(1, 100)
     dct = add_datetimes({
         'subforum_id': get_rand_id(),
         'title': choice(SUBFORUM_TITLES) + salt(),
         'description': choice(SUBFORUM_DESCRIPTIONS),
-        'position': random.randint(0, 100),
+        'position': _POSITION,
     })
     dct.update(**kwargs)
     return dct
