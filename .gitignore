@@ -88,5 +88,8 @@ local_settings.py
 # virtual env
 venv/
 
+# generated fake data
+data/fake-data.json
+
 .env
 db.sqlite3
