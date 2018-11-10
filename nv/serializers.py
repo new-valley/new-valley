@@ -24,6 +24,7 @@ from nv.models import (
     User,
     Subforum,
     Topic,
+    Post,
 )
 
 
@@ -90,4 +91,21 @@ class TopicSchema(ModelSchema):
     class Meta:
         unknown = EXCLUDE
         model = Topic
+        sqla_session = db.session
+
+
+class PostSchema(ModelSchema):
+    post_id = field_for(Post, 'post_id', dump_only=True)
+    content = field_for(Post, 'content', required=True)
+    status = field_for(Post, 'status', required=True)
+    user = Nested(
+        UserSchema, many=False, dump_only=True, exclude=['posts'])
+    topic = Nested(
+        TopicSchema, many=False, dump_only=True, exclude=['posts'])
+    created_at = field_for(Topic, 'created_at', dump_only=True)
+    updated_at = field_for(Topic, 'updated_at', dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
+        model = Post
         sqla_session = db.session

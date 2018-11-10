@@ -55,12 +55,13 @@ class User(Base):
     email = Column(String(128), unique=True, nullable=False)
     password = Column(String(128), nullable=False)
     roles = Column(String(256), nullable=False, default='user')
-    status = Column(String(128), nullable=False, default='active')
+    status = Column(String(64), nullable=False, default='active')
     avatar_id = Column(
         Integer, ForeignKey('avatars.avatar_id'), nullable=False)
     signature = Column(String(1024), nullable=False, default='')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    posts = relationship('Post', backref='user', lazy=True)
 
     @classmethod
     def create_and_save(cls, **kwargs):
@@ -89,9 +90,28 @@ class Topic(Base):
     __tablename__ = 'topics'
     topic_id = Column(Integer, primary_key=True)
     title = Column(String(128), unique=True, nullable=False)
-    status = Column(String(128), nullable=False, default='published')
+    status = Column(String(64), nullable=False, default='published')
     subforum_id = Column(
         Integer, ForeignKey('subforums.subforum_id'), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    posts = relationship('Post', backref='topic', lazy=True)
+
+
+POST_STATUSES = {
+    'published',
+    'unpublished',
+}
+
+class Post(Base):
+    __tablename__ = 'posts'
+    post_id = Column(Integer, primary_key=True)
+    user_id = Column(
+        Integer, ForeignKey('users.user_id'), nullable=False)
+    topic_id = Column(
+        Integer, ForeignKey('topics.topic_id'), nullable=False)
+    content = Column(Text, nullable=False, default='')
+    status = Column(String(64), nullable=False, default='published')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

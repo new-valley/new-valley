@@ -12,6 +12,7 @@ from nv.resources import (
     users,
     subforums,
     topics,
+    posts,
 )
 api = Api(prefix='/api')
 #test
@@ -23,6 +24,8 @@ api.add_resource(users.UserRes, '/users/<int:user_id>')
 api.add_resource(subforums.SubforumsRes, '/subforums')
 #topics
 api.add_resource(topics.TopicsRes, '/topics')
+#posts
+api.add_resource(posts.PostsRes, '/posts')
 #auth
 #api.add_resource(auth.UserRes, '/users/<int:user_id>')
 #api.add_resource(auth.UsersRes, '/users')
