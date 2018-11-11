@@ -15,9 +15,6 @@ from marshmallow.fields import (
     Nested,
     List,
     String,
-    Method,
-)
-from marshmallow.validate import (
     Email,
 )
 from nv.database import db
@@ -28,6 +25,7 @@ from nv.models import (
     Topic,
     Post,
 )
+from nv.util import generate_hash
 
 
 class AvatarSchema(ModelSchema):
@@ -44,24 +42,63 @@ class AvatarSchema(ModelSchema):
         exclude = ['users']
 
 
+def _split_by_commas(string):
+    tokens = [t.strip() for t in string.split(',') if t.strip()]
+    return tokens
+
+
 class UserSchema(ModelSchema):
     user_id = field_for(User, 'user_id', dump_only=True)
     username = field_for(User, 'username', required=True)
     password = field_for(User, 'password', required=True, load_only=True)
-    email = field_for(User, 'email', required=True, validator=Email,
-        load_only=True)
-    roles = Method('split_roles_by_commas')
+    email = Email(required=True, load_only=not True)
+    roles = field_for(User, 'roles')
     status = field_for(User, 'status')
     avatar_id = field_for(User, 'avatar_id', required=True, load_only=True)
     avatar = Nested(
         AvatarSchema, many=False, exclude=['users'], dump_only=True)
-    signature = field_for(User, 'signature', required=True)
+    signature = field_for(User, 'signature', required=False)
     created_at = field_for(User, 'created_at', dump_only=True)
     updated_at = field_for(User, 'updated_at', dump_only=True)
 
-    def split_roles_by_commas(self, obj):
-        roles = [r.strip() for r in obj.roles.split(',') if r.strip()]
-        return roles
+    @validates('password')
+    def check_password_len(self, password):
+        if len(password) < User.MIN_UNHASHED_PASSWORD_LEN:
+            raise ValidationError(
+                'password should be at least {} chars long'.format(
+                    User.MIN_UNHASHED_PASSWORD_LEN))
+
+    @validates('roles')
+    def check_roles(self, roles):
+        roles = _split_by_commas(roles)
+        if not roles:
+            raise ValidationError('set of roles cannot be empty')
+        for role in roles:
+            if not role in User.VALID_ROLES:
+                raise ValidationError('role \'{}\' is invalid'.format(role))
+
+    @validates('status')
+    def check_status(self, status):
+        if not status in User.VALID_STATUSES:
+            raise ValidationError('status \'{}\' is invalid'.format(status))
+
+    @post_load
+    def clean_roles(self, data):
+        if 'roles' in data:
+            roles = set(_split_by_commas(data['roles']))
+            data['roles'] = ','.join(roles)
+        return data
+
+    @post_dump
+    def split_roles_by_commas(self, data):
+        data['roles'] = _split_by_commas(data['roles'])
+        return data
+
+    @post_load
+    def hash_password(self, data):
+        if 'password' in data:
+            data['password'] = generate_hash(data['password'])
+        return data
 
     class Meta:
         unknown = EXCLUDE

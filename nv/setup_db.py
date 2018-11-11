@@ -10,6 +10,7 @@ from nv.models import (
     User,
     Avatar,
 )
+from nv.util import generate_hash
 
 def get_pass(prompt, max_n_trials=3):
     for i in range(max_n_trials):
@@ -60,7 +61,7 @@ def create_su(app, passwd=''):
         avatar = Avatar.query.get(1)
         User.create_and_save(
             username='su',
-            password=passwd,
+            password=generate_hash(passwd),
             email='su@nv.com',
             signature='usuario banido, abracos',
             avatar_id=avatar.avatar_id,

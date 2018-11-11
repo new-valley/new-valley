@@ -167,7 +167,7 @@ def get_rand_user(**kwargs):
         'user_id': get_rand_id(),
         'username': choice(USERNAMES) + salt(),
         'roles': ', '.join(
-            sample(USER_ROLES, random.randint(0, len(USER_ROLES)))),
+            sample(USER_ROLES, random.randint(1, len(USER_ROLES)))),
         'status': choice(USER_STATUSES),
         'avatar': avatar,
         'avatar_id': avatar['avatar_id'],

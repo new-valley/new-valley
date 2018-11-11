@@ -1,5 +1,7 @@
 from nv.database import db
 from nv.util import generate_hash
+from sqlalchemy.orm import validates
+from marshmallow import ValidationError
 
 Column = db.Column
 Integer = db.Integer
@@ -37,19 +39,22 @@ class Avatar(Base):
     users = relationship('User', backref='avatar', lazy=True)
 
 
-USER_STATUSES = {
-    'active',
-    'banned',
-    'kicked',
-}
-
-USER_ROLES = {
-    'user',
-    'moderator',
-}
-
 class User(Base):
+    VALID_ROLES = {
+        'user',
+        'moderator',
+    }
+
+    VALID_STATUSES = {
+        'active',
+        'banned',
+        'kicked',
+    }
+
+    MIN_UNHASHED_PASSWORD_LEN = 8
+
     __tablename__ = 'users'
+
     user_id = Column(Integer, primary_key=True)
     username = Column(String(128), unique=True, nullable=False)
     email = Column(String(128), unique=True, nullable=False)
@@ -63,9 +68,12 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     posts = relationship('Post', backref='user', lazy=True, cascade='delete')
 
-    def __init__(self, **kwargs):
-        kwargs['password'] = generate_hash(kwargs['password'])
-        super().__init__(**kwargs)
+    @validates('avatar_id')
+    def check_avatar_id(self, key, avatar_id):
+        if not Avatar.query.filter_by(avatar_id=avatar_id).first():
+            raise ValidationError(
+                'avatar id={} does not exist'.format(avatar_id))
+        return avatar_id
 
 
 class Subforum(Base):
