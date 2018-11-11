@@ -128,6 +128,7 @@ class RevokedToken(Base):
     __tablename__ = 'revoked_tokens'
     revoked_token_id = Column(Integer, primary_key=True)
     jti = Column(String(120))
+
     @classmethod
     def is_jti_blacklisted(cls, jti):
         query = cls.query.filter_by(jti=jti).first()

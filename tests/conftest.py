@@ -100,6 +100,42 @@ def user_id(app):
     yield _user_id_getter(app)()
 
 
+def _access_token_getter(app):
+    def wrapper(username='user'):
+        with app.app_context():
+            access_token = create_access_token(identity=username)
+        return access_token
+    return wrapper
+
+
+@pytest.fixture()
+def access_token_getter(app):
+    return _access_token_getter(app)
+
+
+@pytest.fixture()
+def access_token(app):
+    yield _access_token_getter(app)()
+
+
+def _refresh_token_getter(app):
+    def wrapper(username='user'):
+        with app.app_context():
+            refresh_token = create_refresh_token(identity=username)
+        return refresh_token
+    return wrapper
+
+
+@pytest.fixture()
+def refresh_token_getter(app):
+    return _refresh_token_getter(app)
+
+
+@pytest.fixture()
+def refresh_token(app):
+    yield _refresh_token_getter(app)()
+
+
 def _client_with_tok_getter(app):
     def wrapper(username='user'):
         with app.test_client() as c:
