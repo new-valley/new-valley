@@ -27,6 +27,7 @@ api.add_resource(subforums.SubforumsRes, '/subforums')
 api.add_resource(topics.TopicsRes, '/topics')
 #posts
 api.add_resource(posts.PostsRes, '/posts')
+api.add_resource(posts.PostRes, '/posts/<int:post_id>')
 #auth
 api.add_resource(auth.Login, '/auth/login')
 api.add_resource(auth.TokenRefresh, '/auth/token_refresh')

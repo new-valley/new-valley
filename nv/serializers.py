@@ -158,6 +158,11 @@ class PostSchema(ModelSchema):
     created_at = field_for(Topic, 'created_at', dump_only=True)
     updated_at = field_for(Topic, 'updated_at', dump_only=True)
 
+    @validates('status')
+    def check_status(self, status):
+        if not status in Post.VALID_STATUSES:
+            raise ValidationError('status \'{}\' is invalid'.format(status))
+
     class Meta:
         unknown = EXCLUDE
         model = Post

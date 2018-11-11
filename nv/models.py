@@ -99,13 +99,14 @@ class Topic(Base):
     posts = relationship('Post', backref='topic', lazy=True, cascade='delete')
 
 
-POST_STATUSES = {
-    'published',
-    'unpublished',
-}
-
 class Post(Base):
+    VALID_STATUSES = {
+        'published',
+        'unpublished',
+    }
+
     __tablename__ = 'posts'
+
     post_id = Column(Integer, primary_key=True)
     user_id = Column(
         Integer, ForeignKey('users.user_id'), nullable=False)

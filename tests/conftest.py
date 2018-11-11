@@ -6,7 +6,10 @@ from nv.util import generate_hash
 from nv.database import db
 from nv.models import (
     User,
-    Avatar
+    Avatar,
+    Subforum,
+    Topic,
+    Post,
 )
 
 
@@ -17,7 +20,7 @@ def app():
     with app.app_context():
         db.create_all()
         #dummy avatars
-        avatar = Avatar.create_and_save(
+        Avatar.create_and_save(
             uri='http://example.com/img.jpg',
             category='dummy',
         )
@@ -25,7 +28,7 @@ def app():
             uri='http://example.com/img2.jpg',
             category='dummy2',
         )
-        Avatar.create_and_save(
+        avatar = Avatar.create_and_save(
             uri='http://example.com/img3.png',
             category='dummy',
         )
@@ -46,21 +49,62 @@ def app():
             roles='moderator',
         )
         #simple users
-        User.create_and_save(
+        user = User.create_and_save(
             username='user',
             password=generate_hash('testpass'),
             email='user@users.com',
             avatar_id=avatar.avatar_id,
             roles='user',
         )
-        User.create_and_save(
+        user_2 = User.create_and_save(
             username='user_b',
             password=generate_hash('testpass'),
             email='user_b@users.com',
             avatar_id=avatar.avatar_id,
             roles='user',
         )
-        app.dummy_avatar_id = avatar.avatar_id
+        #dummy subforums
+        subforum = Subforum.create_and_save(
+            title='subforum',
+            description='descr',
+            position=5,
+        )
+        subforum_2 = Subforum.create_and_save(
+            title='games',
+            description='example',
+            position=2,
+        )
+        #dummy topics
+        topic = Topic.create_and_save(
+            title='topic',
+            subforum_id=subforum.subforum_id,
+        )
+        topic_2 = Topic.create_and_save(
+            title='another topic',
+            status='unpublished',
+            subforum_id=subforum.subforum_id,
+        )
+        Topic.create_and_save(
+            title='yet another topic',
+            subforum_id=subforum_2.subforum_id,
+        )
+        #dummy posts
+        post = Post.create_and_save(
+            content='post content',
+            user_id=user.user_id,
+            topic_id=topic.topic_id,
+        )
+        Post.create_and_save(
+            content='post content',
+            status='unpublished',
+            user_id=user.user_id,
+            topic_id=topic_2.topic_id,
+        )
+        Post.create_and_save(
+            content='more post content',
+            user_id=user_2.user_id,
+            topic_id=topic.topic_id,
+        )
     yield app
     #teardown
     with app.app_context():
@@ -88,6 +132,27 @@ def avatar_id(app):
     with app.app_context():
         avatar_id = Avatar.query.first().avatar_id
     yield avatar_id
+
+
+@pytest.fixture()
+def post_id(app):
+    with app.app_context():
+        post_id = Post.query.first().post_id
+    yield post_id
+
+
+def _post_id_getter(app):
+    def wrapper(username='user'):
+        with app.app_context():
+            user_id = User.query.filter_by(username=username).first().user_id
+            post_id = Post.query.filter_by(user_id=user_id).first().post_id
+        return post_id
+    return wrapper
+
+
+@pytest.fixture()
+def post_id_getter(app):
+    return _post_id_getter(app)
 
 
 def _user_id_getter(app):
