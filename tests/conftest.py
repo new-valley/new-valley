@@ -16,9 +16,17 @@ def app():
     app = get_app(config.get_app_test_config_class())
     with app.app_context():
         db.create_all()
-        #dummy avatar
+        #dummy avatars
         avatar = Avatar.create_and_save(
             uri='http://example.com/img.jpg',
+            category='dummy',
+        )
+        Avatar.create_and_save(
+            uri='http://example.com/img2.jpg',
+            category='dummy2',
+        )
+        Avatar.create_and_save(
+            uri='http://example.com/img3.png',
             category='dummy',
         )
         #superuser

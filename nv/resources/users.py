@@ -84,7 +84,6 @@ class UserRes(Resource):
         if {'roles', 'status', 'created_at'} <= set(request.form.keys()) \
             and not (is_admin(user) or is_moderator(user)):
             return mk_errors(401, 'operation not allowed for user')
-
         ret = generic_put(
             obj=target_user,
             schema=UserSchema(),

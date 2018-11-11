@@ -34,7 +34,8 @@ def test_client_filters_users_fields(client):
 def test_client_offsets_users(client):
     resp_1 = client.get('/api/users')
     resp_2 = client.get('/api/users?offset=2')
-    assert len(resp_1.json['data']) == len(resp_2.json['data']) + 2
+    assert len(resp_1.json['data']) \
+        == len(resp_2.json['data']) + min(2, len(resp_1.json['data']))
     
 
 def test_client_limits_users(client):
@@ -42,15 +43,6 @@ def test_client_limits_users(client):
     resp_2 = client.get('/api/users?max_n_results=2')
     assert len(resp_1.json['data']) <= 1
     assert len(resp_2.json['data']) <= 2
-
-
-def test_client_filters_users_fields(client):
-    resp = client.get('/api/users?fields=username,signature')
-    users = resp.json['data']
-    assert {
-        'username',
-        'signature',
-    } == set(users[0].keys())
 
 
 def test_client_can_create_user(client):
@@ -62,7 +54,20 @@ def test_client_can_create_user(client):
         }
     )
     assert resp.status_code == 200
+
+
+def test_client_gets_correct_data_on_user_creation(client):
+    resp = client.post('/api/users',
+        data={
+            'username': 'test',
+            'password': 'testpass',
+            'email': 'foo@bar.com',
+        }
+    )
     assert 'data' in resp.json
+    assert resp.json['data']['username'] == 'test'
+    assert 'email' not in resp.json['data']
+    assert 'password' not in resp.json['data']
 
 
 def test_client_cannot_overwrite_user(client):
@@ -157,7 +162,7 @@ def test_logged_in_client_can_delete_its_user(
     assert resp.status_code == 204
 
 
-def test_logged_in_client_cannot_delete_other_user(
+def test_logged_in_user_cannot_delete_other_user(
         client_with_tok_getter, user_id_getter):
     client_with_tok = client_with_tok_getter('user')
     other_user_id = user_id_getter('user_b')
@@ -235,9 +240,9 @@ def test_logged_in_client_corretly_edits_its_user(
     assert resp_1.status_code == 200
     assert resp_2.status_code == 200
     assert resp_3.status_code == 200
-    assert resp_2.json['data']['username'] \
+    assert resp_3.json['data']['username'] \
         == resp_1.json['data']['username'] + '_altered'
-    assert resp_2.json['data']['signature'] \
+    assert resp_3.json['data']['signature'] \
         == resp_1.json['data']['signature'] + '_other'
 
 

@@ -17,6 +17,7 @@ from nv.resources import (
 api = Api(prefix='/api')
 #avatars
 api.add_resource(avatars.AvatarsRes, '/avatars')
+api.add_resource(avatars.AvatarRes, '/avatars/<int:avatar_id>')
 #users
 api.add_resource(users.UsersRes, '/users')
 api.add_resource(users.UserRes, '/users/<int:user_id>')
