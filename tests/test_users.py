@@ -129,6 +129,18 @@ def test_client_cannot_create_user_with_missing_fields(client):
     assert resp_3.status_code == 400
 
 
+def test_client_cannot_create_user_referencing_nonexistent_avatar(client):
+    resp = client.post('/api/users',
+        data={
+            'username': 'test',
+            'password': 'testpass',
+            'email': 'foo@bar.com',
+            'avatar_id': 999999,
+        }
+    )
+    assert resp.status_code == 400
+
+
 def test_client_can_get_user(client, user_id):
     resp = client.get('/api/users/{}'.format(user_id))
     assert resp.status_code == 200
@@ -244,6 +256,18 @@ def test_logged_in_client_corretly_edits_its_user(
         == resp_1.json['data']['username'] + '_altered'
     assert resp_3.json['data']['signature'] \
         == resp_1.json['data']['signature'] + '_other'
+
+
+def test_logged_in_client_cannot_edit_user_referencing_nonexistent_avatar(
+        client_with_tok_getter, user_id_getter):
+    client_with_tok = client_with_tok_getter('user')
+    user_id = user_id_getter('user')
+    resp = client_with_tok.put('/api/users/{}'.format(user_id),
+        data={
+            'avatar_id': 999999,
+        }
+    )
+    assert resp.status_code == 400
 
 
 def test_logged_in_client_cannot_edit_other_user(
