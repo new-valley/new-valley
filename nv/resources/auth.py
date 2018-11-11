@@ -74,21 +74,6 @@ class LogoutAccess(Resource):
             return mk_errors(500, 'error in logout')
 
 
-class LogoutRefresh(Resource):
-    @jwt_refresh_token_required
-    def post(self):
-        '''
-        Revoke refresh token.
-        '''
-        jti = get_raw_jwt()['jti']
-        try:
-            revoked_token = RevokedToken(jti=jti)
-            revoked_token.save()
-            return '', 204
-        except:
-            return mk_errors('error in logout')
-
-
 class Ok(Resource):
     @jwt_required
     def get(self):
