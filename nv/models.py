@@ -1,5 +1,4 @@
 from nv.database import db
-from nv.util import generate_hash
 from sqlalchemy.orm import validates
 from marshmallow import ValidationError
 
@@ -43,6 +42,7 @@ class User(Base):
     VALID_ROLES = {
         'user',
         'moderator',
+        'admin',
     }
 
     VALID_STATUSES = {

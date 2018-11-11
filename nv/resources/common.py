@@ -152,8 +152,9 @@ def get_user(user_id=None, username=None, abort_if_not_found=True):
 
 
 def is_admin(user):
-    return user.username in config.superusers
+    return user.username in config.superusers\
+        or 'admin' in user.roles.split(',')
 
 
 def is_moderator(user):
-    return user.role == 'moderator'
+    return 'moderator' in user.roles.split(',')

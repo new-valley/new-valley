@@ -8,6 +8,7 @@ from flask_jwt_extended import (
 )
 from nv.models import (
     User,
+    Avatar,
 )
 from nv.serializers import (
     UserSchema,
@@ -41,9 +42,13 @@ class UsersRes(Resource):
         return ret
 
     def post(self):
+        data = {k: v[0] for k, v in dict(request.form).items()}
+        #default avatar to be chosen
+        if not 'avatar_id' in data:
+            data['avatar_id'] = Avatar.query.first().avatar_id
         ret = generic_post(
             schema=UserSchema(),
-            data=request.form
+            data=data,
         )
         return ret
 
@@ -63,7 +68,6 @@ class UserRes(Resource):
         #only the user itself/admins can perform the operation
         if user.user_id != target_user.user_id and not is_admin(user):
             return mk_errors(401, 'operation not allowed for user')
-
         ret = generic_delete(
             obj=target_user,
         )
