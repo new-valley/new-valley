@@ -51,7 +51,7 @@ class UserSchema(ModelSchema):
     user_id = field_for(User, 'user_id', dump_only=True)
     username = field_for(User, 'username', required=True)
     password = field_for(User, 'password', required=True, load_only=True)
-    email = Email(required=True, load_only=not True)
+    email = Email(required=True, load_only=True)
     roles = field_for(User, 'roles')
     status = field_for(User, 'status')
     avatar_id = field_for(User, 'avatar_id', required=True, load_only=True)

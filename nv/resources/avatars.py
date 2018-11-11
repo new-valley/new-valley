@@ -33,7 +33,7 @@ from nv.resources import common
 class AvatarsRes(Resource):
     def get(self):
         args = common.parse_get_coll_args(request)
-        objs = common.get_coll(
+        objs = common.generic_get_coll(
             full_query=Avatar.query,
             schema=AvatarSchema(many=True),
             **args,

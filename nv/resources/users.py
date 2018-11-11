@@ -24,7 +24,14 @@ from nv.util import (
     mk_errors,
     fmt_validation_error_messages,
 )
-from nv.resources import common
+from nv.resources.common import (
+    parse_get_coll_args,
+    generic_get_coll,
+    generic_get,
+    generic_post,
+    generic_put,
+    generic_delete,
+)
 from nv.database import db
 from nv import config
 
@@ -36,69 +43,52 @@ from nv import config
 class UsersRes(Resource):
     #@jwt_required
     def get(self):
-        args = common.parse_get_coll_args(request)
-        objs = common.get_coll(
+        #check_priviledges()
+        args = parse_get_coll_args(request)
+        ret = generic_get_coll(
             full_query=User.query,
             schema=UserSchema(many=True),
             **args,
         )
-        return objs
+        return ret
 
     #@jwt_required
     def post(self):
-        schema = UserSchema()
-        try:
-            user = schema.load(request.form)
-        except ValidationError as e:
-            return mk_errors(400, fmt_validation_error_messages(e.messages))
-        try:
-            db.session.add(user)
-            db.session.commit()
-        except exc.IntegrityError as e:
-            db.session.rollback()
-            return mk_errors(400, '{}'.format(e.args))
-        obj = {
-            'data': UserSchema().dump(user),
-        }
-        return obj
+        #check_priviledges()
+        ret = generic_post(
+            schema=UserSchema(),
+            data=request.form
+        )
+        return ret
 
 
 class UserRes(Resource):
     #@jwt_required
     def get(self, user_id):
-        user = User.query.filter_by(user_id=user_id).first()
-        if user is None:
-            return mk_errors(404, 'user id={} does not exist'.format(user_id))
-        data = UserSchema().dump(user)
-        obj = {
-            'data': data,
-        }
-        return obj
+        #check_priviledges()
+        ret = generic_get(
+            model_cls=User,
+            uid=user_id,
+            schema=UserSchema(),
+        )
+        return ret
 
     #@jwt_required
     def delete(self, user_id):
         #check_priviledges()
-        user = User.query.filter_by(user_id=user_id).first()
-        if user is None:
-            return mk_errors(404, 'user id={} does not exist'.format(user_id))
-        db.session.delete(user)
-        db.session.commit()
-        return '', 204
+        ret = generic_delete(
+            model_cls=User,
+            uid=user_id,
+        )
+        return ret
 
     #@jwt_required
     def put(self, user_id):
         #check_priviledges()
-        user = User.query.filter_by(user_id=user_id).first()
-        if user is None:
-            return mk_errors(404, 'user id={} does not exist'.format(user_id))
-        schema = UserSchema()
-        try:
-            text = schema.load(request.form, instance=user, partial=True)
-            db.session.add(user)
-            db.session.commit()
-        except ValidationError as e:
-            return mk_errors(400, fmt_validation_error_messages(e.messages))
-        except exc.IntegrityError as e:
-            db.session.rollback()
-            return mk_errors(400, '{}'.format(e.args))
-        return schema.dump(user)
+        ret = generic_put(
+            model_cls=User,
+            uid=user_id,
+            schema=UserSchema(),
+            data=request.form
+        )
+        return ret

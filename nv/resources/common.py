@@ -4,10 +4,17 @@ from webargs.fields import (
     Int,
     DelimitedList,
 )
+from marshmallow import (
+    ValidationError,
+)
+from sqlalchemy import exc
 from webargs import validate
 from nv.util import (
     filter_fields,
+    mk_errors,
+    fmt_validation_error_messages,
 )
+from nv.database import db
 
 def crop_query(query, offset=None, max_n_results=None):
     if offset is not None:
@@ -52,7 +59,7 @@ def order_query(query, by='newest', date_field='created_at'):
     query = query.order_by(key)
     return query
 
-def get_coll(
+def generic_get_coll(
         full_query, schema,
         offset=None, max_n_results=None, fields=None, order='newest'):
     total = full_query.count()
@@ -67,3 +74,58 @@ def get_coll(
         'data': data,
     }
 
+
+def generic_get(model_cls, uid, schema):
+    obj = model_cls.query.get(uid)
+    if obj is None:
+        return mk_errors(404, 'elem id={} does not exist'.format(uid))
+    data = schema.dump(obj)
+    ret = {
+        'data': data,
+    }
+    return ret
+
+
+def generic_post(schema, data):
+    try:
+        obj = schema.load(data)
+    except ValidationError as e:
+        return mk_errors(400, fmt_validation_error_messages(e.messages))
+    try:
+        db.session.add(obj)
+        db.session.commit()
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        return mk_errors(400, '{}'.format(e.args))
+    ret = {
+        'data': schema.dump(obj),
+    }
+    return ret
+
+
+def generic_put(model_cls, uid, schema, data):
+    obj = model_cls.query.get(uid)
+    if obj is None:
+        return mk_errors(404, 'elem id={} does not exist'.format(uid))
+    try:
+        obj = schema.load(data, instance=obj, partial=True)
+        db.session.add(obj)
+        db.session.commit()
+    except ValidationError as e:
+        return mk_errors(400, fmt_validation_error_messages(e.messages))
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        return mk_errors(400, '{}'.format(e.args))
+    ret = {
+        'data': schema.dump(obj),
+    }
+    return ret
+
+
+def generic_delete(model_cls, uid):
+    obj = model_cls.query.get(uid)
+    if obj is None:
+        return mk_errors(404, 'elem id={} does not exist'.format(uid))
+    db.session.delete(obj)
+    db.session.commit()
+    return '', 204
