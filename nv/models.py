@@ -62,18 +62,11 @@ class User(Base):
     roles = Column(String(256), nullable=False, default='user')
     status = Column(String(64), nullable=False, default='active')
     avatar_id = Column(
-        Integer, ForeignKey('avatars.avatar_id'), nullable=False)
+        Integer, ForeignKey('avatars.avatar_id'), nullable=True)
     signature = Column(String(1024), nullable=False, default='')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     posts = relationship('Post', backref='user', lazy=True, cascade='delete')
-
-    @validates('avatar_id')
-    def check_avatar_id(self, key, avatar_id):
-        if not Avatar.query.filter_by(avatar_id=avatar_id).first():
-            raise ValidationError(
-                'avatar id={} does not exist'.format(avatar_id))
-        return avatar_id
 
 
 class Subforum(Base):

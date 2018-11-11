@@ -82,6 +82,12 @@ class UserSchema(ModelSchema):
         if not status in User.VALID_STATUSES:
             raise ValidationError('status \'{}\' is invalid'.format(status))
 
+    @validates('avatar_id')
+    def check_avatar_exists(self, avatar_id):
+        if not Avatar.query.filter_by(avatar_id=avatar_id).first():
+            raise ValidationError(
+                'avatar id={} does not exist'.format(avatar_id))
+
     @post_load
     def clean_roles(self, data):
         if 'roles' in data:
