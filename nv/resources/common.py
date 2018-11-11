@@ -9,12 +9,17 @@ from marshmallow import (
 )
 from sqlalchemy import exc
 from webargs import validate
+from nv.models import (
+    User,
+)
+from flask import abort
 from nv.util import (
     filter_fields,
     mk_errors,
     fmt_validation_error_messages,
 )
 from nv.database import db
+from nv import config
 
 def crop_query(query, offset=None, max_n_results=None):
     if offset is not None:
@@ -75,10 +80,9 @@ def generic_get_coll(
     }
 
 
-def generic_get(model_cls, uid, schema):
-    obj = model_cls.query.get(uid)
+def generic_get(obj, schema):
     if obj is None:
-        return mk_errors(404, 'elem id={} does not exist'.format(uid))
+        return mk_errors(404, 'element does not exist')
     data = schema.dump(obj)
     ret = {
         'data': data,
@@ -103,10 +107,9 @@ def generic_post(schema, data):
     return ret
 
 
-def generic_put(model_cls, uid, schema, data):
-    obj = model_cls.query.get(uid)
+def generic_put(obj, schema, data):
     if obj is None:
-        return mk_errors(404, 'elem id={} does not exist'.format(uid))
+        return mk_errors(404, 'element does not exist')
     try:
         obj = schema.load(data, instance=obj, partial=True)
         db.session.add(obj)
@@ -122,10 +125,35 @@ def generic_put(model_cls, uid, schema, data):
     return ret
 
 
-def generic_delete(model_cls, uid):
-    obj = model_cls.query.get(uid)
+def generic_delete(obj):
     if obj is None:
-        return mk_errors(404, 'elem id={} does not exist'.format(uid))
+        return mk_errors(404, 'element does not exist')
     db.session.delete(obj)
     db.session.commit()
     return '', 204
+
+
+def get_obj(query, abort_if_not_found=True, not_found_msg='item not found'):
+    obj = query.first()
+    if obj is None and abort_if_not_found:
+        abort(404, not_found_msg)
+    return obj
+
+
+def get_user(user_id=None, username=None, abort_if_not_found=True):
+    assert user_id is not None or username is not None
+    if user_id is not None:
+        query = User.query.filter_by(user_id=user_id)
+        not_found_msg = 'user id={} doest not exist'.format(user_id)
+    else:
+        query = User.query.filter_by(username=username)
+        not_found_msg = 'user username={} doest not exist'.format(username)
+    return get_obj(query, abort_if_not_found, not_found_msg)
+
+
+def is_admin(user):
+    return user.username in config.superusers
+
+
+def is_moderator(user):
+    return user.role == 'moderator'

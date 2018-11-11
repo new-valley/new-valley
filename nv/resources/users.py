@@ -2,17 +2,9 @@ from flask import request
 from flask_restful import (
     Resource,
 )
-from sqlalchemy import exc
 from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
     jwt_required,
-    jwt_refresh_token_required,
     get_jwt_identity,
-    get_raw_jwt
-)
-from marshmallow import (
-    ValidationError,
 )
 from nv.models import (
     User,
@@ -22,7 +14,6 @@ from nv.serializers import (
 )
 from nv.util import (
     mk_errors,
-    fmt_validation_error_messages,
 )
 from nv.resources.common import (
     parse_get_coll_args,
@@ -31,19 +22,16 @@ from nv.resources.common import (
     generic_post,
     generic_put,
     generic_delete,
+    get_user,
+    is_admin,
+    is_moderator,
 )
 from nv.database import db
 from nv import config
 
-#def check_priviledges():
-#    if not get_jwt_identity() in config.superusers:
-#        abort(401, 'unauthorized user')
-
 
 class UsersRes(Resource):
-    #@jwt_required
     def get(self):
-        #check_priviledges()
         args = parse_get_coll_args(request)
         ret = generic_get_coll(
             full_query=User.query,
@@ -52,9 +40,7 @@ class UsersRes(Resource):
         )
         return ret
 
-    #@jwt_required
     def post(self):
-        #check_priviledges()
         ret = generic_post(
             schema=UserSchema(),
             data=request.form
@@ -63,31 +49,40 @@ class UsersRes(Resource):
 
 
 class UserRes(Resource):
-    #@jwt_required
     def get(self, user_id):
-        #check_priviledges()
         ret = generic_get(
-            model_cls=User,
-            uid=user_id,
+            obj=User.query.get(user_id),
             schema=UserSchema(),
         )
         return ret
 
-    #@jwt_required
+    @jwt_required
     def delete(self, user_id):
-        #check_priviledges()
+        user = get_user(username=get_jwt_identity())
+        target_user = get_user(user_id=user_id)
+        #only the user itself/admins can perform the operation
+        if user.user_id != target_user.user_id and not is_admin(user):
+            return mk_errors(401, 'operation not allowed for user')
+
         ret = generic_delete(
-            model_cls=User,
-            uid=user_id,
+            obj=target_user,
         )
         return ret
 
-    #@jwt_required
+    @jwt_required
     def put(self, user_id):
-        #check_priviledges()
+        user = get_user(username=get_jwt_identity())
+        target_user = get_user(user_id=user_id)
+        #only the user itself/admins can perform the operation
+        if user.user_id != target_user.user_id and not is_admin(user):
+            return mk_errors(401, 'operation not allowed for user')
+        #only moderator/admin can alter these properties
+        if {'roles', 'status', 'created_at'} <= set(request.form.keys()) \
+            and not (is_admin(user) or is_moderator(user)):
+            return mk_errors(401, 'operation not allowed for user')
+
         ret = generic_put(
-            model_cls=User,
-            uid=user_id,
+            obj=target_user,
             schema=UserSchema(),
             data=request.form
         )
