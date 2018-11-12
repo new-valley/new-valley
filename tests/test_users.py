@@ -36,7 +36,7 @@ def test_client_offsets_users(client):
     resp_2 = client.get('/api/users?offset=2')
     assert len(resp_1.json['data']) \
         == len(resp_2.json['data']) + min(2, len(resp_1.json['data']))
-    
+
 
 def test_client_limits_users(client):
     resp_1 = client.get('/api/users?max_n_results=1')
@@ -192,6 +192,15 @@ def test_logged_in_admin_can_delete_other_user(admin_with_tok, user_id_getter):
     other_user_id = user_id_getter('user_b')
     resp = admin_with_tok.delete('/api/users/{}'.format(other_user_id))
     assert resp.status_code == 204
+
+
+def test_logged_in_admin_corretly_deletes_user(admin_with_tok, user_id):
+    resp_1 = admin_with_tok.get('/api/users/{}'.format(user_id))
+    resp_2 = admin_with_tok.delete('/api/users/{}'.format(user_id))
+    resp_3 = admin_with_tok.get('/api/users/{}'.format(user_id))
+    assert resp_1.status_code == 200
+    assert resp_2.status_code == 204
+    assert resp_3.status_code == 404
 
 
 def test_logged_off_client_cannot_edit_user(client, user_id):

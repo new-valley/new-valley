@@ -181,3 +181,32 @@ def test_logged_in_admin_corretly_edits_avatar(admin_with_tok, avatar_id):
         == resp_1.json['data']['category'] + '_altered'
     assert resp_3.json['data']['uri'] \
         == resp_1.json['data']['uri'] + '.png'
+
+
+def test_logged_off_client_cannot_delete_avatar(client, avatar_id):
+    resp = client.delete('/api/avatars/{}'.format(avatar_id))
+    assert resp.status_code == 401
+
+
+def test_logged_in_user_cannot_delete_avatar(client_with_tok, avatar_id):
+    resp = client_with_tok.delete('/api/avatars/{}'.format(avatar_id))
+    assert resp.status_code == 401
+
+
+def test_logged_in_mod_cannot_delete_avatar(mod_with_tok, avatar_id):
+    resp = mod_with_tok.delete('/api/avatars/{}'.format(avatar_id))
+    assert resp.status_code == 401
+
+
+def test_logged_in_admin_can_delete_avatar(admin_with_tok, avatar_id):
+    resp = admin_with_tok.delete('/api/avatars/{}'.format(avatar_id))
+    assert resp.status_code == 204
+
+
+def test_logged_in_admin_corretly_deletes_avatar(admin_with_tok, avatar_id):
+    resp_1 = admin_with_tok.get('/api/avatars/{}'.format(avatar_id))
+    resp_2 = admin_with_tok.delete('/api/avatars/{}'.format(avatar_id))
+    resp_3 = admin_with_tok.get('/api/avatars/{}'.format(avatar_id))
+    assert resp_1.status_code == 200
+    assert resp_2.status_code == 204
+    assert resp_3.status_code == 404
