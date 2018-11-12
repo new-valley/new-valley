@@ -82,14 +82,15 @@ class Subforum(Base):
         'Topic', backref='subforum', lazy=True, cascade='delete')
 
 
-TOPIC_STATUSES = {
-    'published',
-    'unpublished',
-    'locked',
-}
-
 class Topic(Base):
+    VALID_STATUSES = {
+        'published',
+        'unpublished',
+        'locked',
+    }
+
     __tablename__ = 'topics'
+
     topic_id = Column(Integer, primary_key=True)
     title = Column(String(128), nullable=False)
     status = Column(String(64), nullable=False, default='published')
@@ -100,6 +101,20 @@ class Topic(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     posts = relationship('Post', backref='topic', lazy=True, cascade='delete')
+
+    #implicitly checked in endpoints
+    '''@validates('user_id')
+    def check_user_exists(self, key, user_id):
+        if not User.query.get(user_id):
+            raise ValidationError('user id={} does not exist'.format(user_id))
+        return user_id
+
+    @validates('subforum_id')
+    def check_subforum_exists(self, key, subforum_id):
+        if not Subforum.query.get(subforum_id):
+            raise ValidationError(
+                'subforum id={} does not exist'.format(subforum_id))
+        return subforum_id'''
 
 
 class Post(Base):
@@ -119,6 +134,20 @@ class Post(Base):
     status = Column(String(64), nullable=False, default='published')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    #implicitly checked in endpoints
+    '''@validates('user_id')
+    def check_user_exists(self, key, user_id):
+        if not User.query.get(user_id):
+            raise ValidationError('user id={} does not exist'.format(user_id))
+        return user_id
+
+    @validates('topic_id')
+    def check_topic_exists(self, key, topic_id):
+        if not Topic.query.get(topic_id):
+            raise ValidationError(
+                'topic id={} does not exist'.format(topic_id))
+        return topic_id'''
 
 
 class RevokedToken(Base):

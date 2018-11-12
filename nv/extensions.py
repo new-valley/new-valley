@@ -30,6 +30,8 @@ api.add_resource(
     subforums.SubforumTopicsRes, '/subforums/<int:subforum_id>/topics')
 #topics
 api.add_resource(topics.TopicsRes, '/topics')
+api.add_resource(topics.TopicRes, '/topics/<int:topic_id>')
+api.add_resource(topics.TopicPostsRes, '/topics/<int:topic_id>/posts')
 #posts
 api.add_resource(posts.PostsRes, '/posts')
 api.add_resource(posts.PostRes, '/posts/<int:post_id>')

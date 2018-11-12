@@ -9,6 +9,7 @@ def test_client_gets_correct_posts_fields(client):
     assert resp.json['offset'] is None
     assert 'total' in resp.json
     assert 'data' in resp.json
+    assert len(resp.json['data']) > 0
     assert resp.json['total'] == len(resp.json['data'])
     assert {
         'post_id',

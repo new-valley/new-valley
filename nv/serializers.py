@@ -135,7 +135,7 @@ class SubforumSchema(ModelSchema):
 class TopicSchema(ModelSchema):
     topic_id = field_for(Topic, 'topic_id', dump_only=True)
     title = field_for(Topic, 'title', required=True)
-    status = field_for(Topic, 'status', required=True)
+    status = field_for(Topic, 'status')
     user_id = field_for(Topic, 'user_id', required=True, load_only=True)
     user = Nested(
         UserSchema, many=False, dump_only=True)
@@ -145,6 +145,11 @@ class TopicSchema(ModelSchema):
         SubforumSchema, many=False, dump_only=True)
     created_at = field_for(Topic, 'created_at', dump_only=True)
     updated_at = field_for(Topic, 'updated_at', dump_only=True)
+
+    @validates('status')
+    def check_status(self, status):
+        if not status in Post.VALID_STATUSES:
+            raise ValidationError('status \'{}\' is invalid'.format(status))
 
     class Meta:
         unknown = EXCLUDE
@@ -156,7 +161,7 @@ class TopicSchema(ModelSchema):
 class PostSchema(ModelSchema):
     post_id = field_for(Post, 'post_id', dump_only=True)
     content = field_for(Post, 'content', required=True)
-    status = field_for(Post, 'status', required=True)
+    status = field_for(Post, 'status')
     user_id = field_for(Post, 'user_id', required=True, load_only=True)
     user = Nested(UserSchema, many=False, dump_only=True)
     topic_id = field_for(Post, 'topic_id', required=True, load_only=True)

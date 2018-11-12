@@ -151,6 +151,27 @@ def post_id(app):
     yield post_id
 
 
+@pytest.fixture()
+def topic_id(app):
+    with app.app_context():
+        topic_id = Topic.query.first().topic_id
+    yield topic_id
+
+
+def _topic_id_getter(app):
+    def wrapper(username='user'):
+        with app.app_context():
+            user_id = User.query.filter_by(username=username).first().user_id
+            topic_id = Topic.query.filter_by(user_id=user_id).first().topic_id
+        return topic_id
+    return wrapper
+
+
+@pytest.fixture()
+def topic_id_getter(app):
+    return _topic_id_getter(app)
+
+
 def _post_id_getter(app):
     def wrapper(username='user'):
         with app.app_context():

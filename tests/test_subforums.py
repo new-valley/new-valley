@@ -9,6 +9,7 @@ def test_client_gets_correct_subforums_fields(client):
     assert resp.json['offset'] is None
     assert 'total' in resp.json
     assert 'data' in resp.json
+    assert len(resp.json['data']) > 0
     assert resp.json['total'] == len(resp.json['data'])
     assert {
         'subforum_id',
@@ -169,6 +170,7 @@ def test_client_gets_correct_subforum_topics_fields(client, subforum_id):
     assert resp.json['offset'] is None
     assert 'total' in resp.json
     assert 'data' in resp.json
+    assert len(resp.json['data']) > 0
     assert resp.json['total'] == len(resp.json['data'])
     assert {
         'topic_id',

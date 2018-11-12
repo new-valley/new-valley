@@ -41,6 +41,23 @@ from nv.resources.common import (
 )
 
 
+def _user_can_create_post(user, topic):
+    return is_admin(user) or is_moderator(user) \
+        or (user.status == 'active' and topic.status == 'published')
+
+
+def _user_can_edit_post(user, post, topic):
+    is_author_and_can_edit = user.status == 'active' \
+        and topic.status == 'published' \
+        and post.status == 'published'
+    return is_admin(user) or is_moderator(user) or is_author_and_can_edit
+
+
+def _user_can_delete_post(user, post, topic):
+    return is_admin(user) or is_moderator(user) or \
+        user.user_id == post.user_id
+
+
 class PostsRes(Resource):
     def get(self):
         args = parse_get_coll_args(request)
