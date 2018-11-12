@@ -78,15 +78,18 @@ def app():
         topic = Topic.create_and_save(
             title='topic',
             subforum_id=subforum.subforum_id,
+            user_id=user.user_id,
         )
         topic_2 = Topic.create_and_save(
             title='another topic',
             status='unpublished',
             subforum_id=subforum.subforum_id,
+            user_id=user.user_id,
         )
         Topic.create_and_save(
             title='yet another topic',
             subforum_id=subforum_2.subforum_id,
+            user_id=user_2.user_id,
         )
         #dummy posts
         post = Post.create_and_save(

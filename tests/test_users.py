@@ -332,3 +332,26 @@ def test_client_gets_correct_user_posts_fields(client, user_id):
         'user',
         'topic',
     } == set(resp.json['data'][0].keys())
+
+
+def test_client_can_get_user_topics(client, user_id):
+    resp = client.get('/api/users/{}/topics'.format(user_id))
+    assert resp.status_code == 200
+
+
+def test_client_gets_correct_user_topics_fields(client, user_id):
+    resp = client.get('/api/users/{}/topics'.format(user_id))
+    assert 'offset' in resp.json
+    assert resp.json['offset'] is None
+    assert 'total' in resp.json
+    assert 'data' in resp.json
+    assert resp.json['total'] == len(resp.json['data'])
+    assert {
+        'topic_id',
+        'title',
+        'status',
+        'user',
+        'subforum',
+        'created_at',
+        'updated_at',
+    } == set(resp.json['data'][0].keys())

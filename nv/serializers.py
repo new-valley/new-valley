@@ -137,10 +137,12 @@ class TopicSchema(ModelSchema):
     title = field_for(Topic, 'title', required=True)
     status = field_for(Topic, 'status', required=True)
     user_id = field_for(Topic, 'user_id', required=True, load_only=True)
+    user = Nested(
+        UserSchema, many=False, dump_only=True)
     subforum_id = field_for(
         Topic, 'subforum_id', required=True, load_only=True)
     subforum = Nested(
-        SubforumSchema, many=False, exclude=['topics'], dump_only=True)
+        SubforumSchema, many=False, dump_only=True)
     created_at = field_for(Topic, 'created_at', dump_only=True)
     updated_at = field_for(Topic, 'updated_at', dump_only=True)
 
@@ -156,11 +158,9 @@ class PostSchema(ModelSchema):
     content = field_for(Post, 'content', required=True)
     status = field_for(Post, 'status', required=True)
     user_id = field_for(Post, 'user_id', required=True, load_only=True)
-    user = Nested(
-        UserSchema, many=False, dump_only=True, exclude=['posts'])
+    user = Nested(UserSchema, many=False, dump_only=True)
     topic_id = field_for(Post, 'topic_id', required=True, load_only=True)
-    topic = Nested(
-        TopicSchema, many=False, dump_only=True, exclude=['posts'])
+    topic = Nested(TopicSchema, many=False, dump_only=True)
     created_at = field_for(Topic, 'created_at', dump_only=True)
     updated_at = field_for(Topic, 'updated_at', dump_only=True)
 
