@@ -74,7 +74,7 @@ class Subforum(Base):
     subforum_id = Column(Integer, primary_key=True)
     title = Column(String(64), unique=True, nullable=False)
     description = Column(String(128), nullable=False)
-    position = Column(Integer, unique=True)
+    position = Column(Integer, unique=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     topics = relationship(

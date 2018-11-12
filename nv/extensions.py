@@ -23,6 +23,7 @@ api.add_resource(users.UsersRes, '/users')
 api.add_resource(users.UserRes, '/users/<int:user_id>')
 #subforums
 api.add_resource(subforums.SubforumsRes, '/subforums')
+api.add_resource(subforums.SubforumRes, '/subforums/<int:subforum_id>')
 #topics
 api.add_resource(topics.TopicsRes, '/topics')
 #posts

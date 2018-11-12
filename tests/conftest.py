@@ -135,6 +135,13 @@ def avatar_id(app):
 
 
 @pytest.fixture()
+def subforum_id(app):
+    with app.app_context():
+        subforum_id = Subforum.query.first().subforum_id
+    yield subforum_id
+
+
+@pytest.fixture()
 def post_id(app):
     with app.app_context():
         post_id = Post.query.first().post_id

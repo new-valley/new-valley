@@ -11,6 +11,9 @@ from marshmallow import (
     validates,
     ValidationError,
 )
+from marshmallow.validate import (
+    Range,
+)
 from marshmallow.fields import (
     Nested,
     List,
@@ -117,7 +120,8 @@ class SubforumSchema(ModelSchema):
     subforum_id = field_for(Subforum, 'subforum_id', dump_only=True)
     title = field_for(Subforum, 'title', required=True)
     description = field_for(Subforum, 'description', required=True)
-    position = field_for(Subforum, 'position', required=True)
+    position = field_for(
+        Subforum, 'position', required=not True, validate=Range(min=1))
     created_at = field_for(Subforum, 'created_at', dump_only=True)
     updated_at = field_for(Subforum, 'updated_at', dump_only=True)
 
