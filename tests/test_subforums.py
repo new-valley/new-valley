@@ -156,3 +156,26 @@ def test_logged_in_client_corretly_edits_subforum(admin_with_tok, subforum_id):
     assert resp_3.status_code == 200
     assert resp_3.json['data']['title'] \
         == resp_1.json['data']['title'] + '_altered'
+
+
+def test_client_can_get_subforum_topics(client, subforum_id):
+    resp = client.get('/api/subforums/{}/topics'.format(subforum_id))
+    assert resp.status_code == 200
+
+
+def test_client_gets_correct_subforum_topics_fields(client, subforum_id):
+    resp = client.get('/api/subforums/{}/topics'.format(subforum_id))
+    assert 'offset' in resp.json
+    assert resp.json['offset'] is None
+    assert 'total' in resp.json
+    assert 'data' in resp.json
+    assert resp.json['total'] == len(resp.json['data'])
+    assert {
+        'topic_id',
+        'title',
+        'status',
+        'user',
+        'subforum',
+        'created_at',
+        'updated_at',
+    } == set(resp.json['data'][0].keys())

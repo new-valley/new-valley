@@ -18,9 +18,11 @@ from webargs.fields import (
 from webargs import validate
 from nv.models import (
     Subforum,
+    Topic,
 )
 from nv.serializers import (
     SubforumSchema,
+    TopicSchema,
 )
 from nv.util import (
     mk_errors,
@@ -94,5 +96,19 @@ class SubforumRes(Resource):
             obj=subforum,
             schema=SubforumSchema(),
             data=request.form
+        )
+        return ret
+
+
+class SubforumTopicsRes(Resource):
+    def get(self, subforum_id):
+        subforum = Subforum.query.get(subforum_id)
+        if subforum is None:
+            return mk_errors(404, 'subforum does not exist')
+        args = parse_get_coll_args(request)
+        ret = generic_get_coll(
+            full_query=Topic.query.filter_by(subforum_id=subforum_id),
+            schema=TopicSchema(many=True),
+            **args
         )
         return ret
