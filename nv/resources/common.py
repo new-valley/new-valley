@@ -7,7 +7,7 @@ from webargs.fields import (
 from marshmallow import (
     ValidationError,
 )
-from sqlalchemy import exc
+from sqlalchemy import exc, desc
 from webargs import validate
 from nv.models import (
     User,
@@ -56,9 +56,9 @@ def parse_get_coll_args(req, args=DEF_GET_COLL_ARGS,
 def order_query(query, by='newest', date_field='created_at'):
     assert by in ORDER_BY_OPTIONS
     if by == 'newest':
-        key = '{}'.format(date_field)
+        key = desc('{}'.format(date_field))
     elif by == 'oldest':
-        key = '{} desc'.format(date_field)
+        key = '{}'.format(date_field)
     else:
         raise ValueError('"by" must bt in {}'.format(ORDER_BY_OPTIONS))
     query = query.order_by(key)
