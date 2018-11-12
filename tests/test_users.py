@@ -309,3 +309,26 @@ def test_logged_in_admin_can_edit_other_user(admin_with_tok, user_id_getter):
         }
     )
     assert resp.status_code == 200
+
+
+def test_client_can_get_user_posts(client, user_id):
+    resp = client.get('/api/users/{}/posts'.format(user_id))
+    assert resp.status_code == 200
+
+
+def test_client_gets_correct_user_posts_fields(client, user_id):
+    resp = client.get('/api/users/{}/posts'.format(user_id))
+    assert 'offset' in resp.json
+    assert resp.json['offset'] is None
+    assert 'total' in resp.json
+    assert 'data' in resp.json
+    assert resp.json['total'] == len(resp.json['data'])
+    assert {
+        'post_id',
+        'created_at',
+        'updated_at',
+        'status',
+        'content',
+        'user',
+        'topic',
+    } == set(resp.json['data'][0].keys())
