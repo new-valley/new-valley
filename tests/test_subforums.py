@@ -181,3 +181,50 @@ def test_client_gets_correct_subforum_topics_fields(client, subforum_id):
         'created_at',
         'updated_at',
     } == set(resp.json['data'][0].keys())
+
+
+def test_logged_off_client_cannot_create_topic_in_subforum(
+        client, subforum_id):
+    resp = client.post('/api/subforums/{}/topics'.format(subforum_id))
+    assert resp.status_code == 401
+
+
+def test_logged_in_client_can_create_topic_in_subforum(
+        client_with_tok, subforum_id):
+    resp = client_with_tok.post(
+        '/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'olar',
+        }
+    )
+    assert resp.status_code == 200
+
+
+def test_logged_in_client_gets_correct_fields_in_topic_creation(
+        client_with_tok, subforum_id):
+    resp = client_with_tok.post('/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'olar',
+        }
+    )
+    assert {
+        'topic_id',
+        'title',
+        'status',
+        'user',
+        'subforum',
+        'created_at',
+        'updated_at',
+    } == set(resp.json['data'].keys())
+
+
+def test_logged_in_client_correctly_creates_topic_in_subforum(
+        client_with_tok, subforum_id):
+    resp = client_with_tok.post('/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'olar',
+        }
+    )
+    assert resp.json['data']['status'] == 'published'
+    assert resp.json['data']['title'] == 'olar'
+    assert resp.json['data']['subforum']['subforum_id'] == subforum_id

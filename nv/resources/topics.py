@@ -45,10 +45,6 @@ from nv.resources.common import (
 )
 
 
-#def _user_can_create_topic(user, subforum=None):
-#    return is_admin(user) or is_moderator(user) or user.status == 'active'
-
-
 def _user_can_delete_topic(user, topic):
     return is_admin(user) or is_moderator(user) or \
         user.user_id == topic.user_id

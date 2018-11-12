@@ -42,6 +42,11 @@ from nv.resources.common import (
     is_moderator,
 )
 
+
+def _user_can_create_topic(user, subforum=None):
+    return is_admin(user) or is_moderator(user) or user.status == 'active'
+
+
 class SubforumsRes(Resource):
     def get(self):
         args = parse_get_coll_args(request)
@@ -110,5 +115,27 @@ class SubforumTopicsRes(Resource):
             full_query=Topic.query.filter_by(subforum_id=subforum_id),
             schema=TopicSchema(many=True),
             **args
+        )
+        return ret
+
+    @jwt_required
+    def post(self, subforum_id):
+        subforum = get_obj(Subforum.query.filter_by(subforum_id=subforum_id),
+            'subforum does not exist')
+        user = get_user(username=get_jwt_identity())
+        #validating/updating data
+        data = {k: v[0] for k, v in dict(request.form).items()}
+        data['user_id'] = user.user_id
+        data['subforum_id'] = subforum.subforum_id
+        schema = TopicSchema()
+        errors = schema.validate(data)
+        if errors:
+            return mk_errors(400, fmt_validation_error_messages(errors))
+        #checking if user can create post
+        if not _user_can_create_topic(user, subforum):
+            return mk_errors(400, 'user cannot create topic')
+        ret = generic_post(
+            schema=schema,
+            data=data,
         )
         return ret
