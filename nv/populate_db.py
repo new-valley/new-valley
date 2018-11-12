@@ -45,10 +45,13 @@ def populate_subforums(data):
 def populate_topics(data):
     with get_app().app_context():
         subforums = Subforum.query.all()
+        users = User.query.all()
     topics = data['topics']
     for topic in topics:
         del topic['subforum']
         topic['subforum_id'] = random.choice(subforums).subforum_id
+        del topic['user']
+        topic['user_id'] = random.choice(users).user_id
     populate(TopicSchema(many=True), topics)
 
 def populate_posts(data):

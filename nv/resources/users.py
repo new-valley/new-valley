@@ -10,10 +10,12 @@ from nv.models import (
     User,
     Avatar,
     Post,
+    Topic,
 )
 from nv.serializers import (
     UserSchema,
     PostSchema,
+    TopicSchema,
 )
 from nv.util import (
     mk_errors,
@@ -98,11 +100,25 @@ class UserPostsRes(Resource):
     def get(self, user_id):
         user = User.query.get(user_id)
         if user is None:
-            return mk_errors(400, 'user does not exist')
+            return mk_errors(404, 'user does not exist')
         args = parse_get_coll_args(request)
         ret = generic_get_coll(
             full_query=Post.query.filter_by(user_id=user_id),
             schema=PostSchema(many=True),
+            **args
+        )
+        return ret
+
+
+class UserTopicsRes(Resource):
+    def get(self, user_id):
+        user = User.query.get(user_id)
+        if user is None:
+            return mk_errors(404, 'user does not exist')
+        args = parse_get_coll_args(request)
+        ret = generic_get_coll(
+            full_query=Topic.query.filter_by(user_id=user_id),
+            schema=TopicSchema(many=True),
             **args
         )
         return ret

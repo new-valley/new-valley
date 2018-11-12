@@ -67,6 +67,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     posts = relationship('Post', backref='user', lazy=True, cascade='delete')
+    topics = relationship('Topic', backref='user', lazy=True, cascade='delete')
 
 
 class Subforum(Base):
@@ -92,6 +93,8 @@ class Topic(Base):
     topic_id = Column(Integer, primary_key=True)
     title = Column(String(128), nullable=False)
     status = Column(String(64), nullable=False, default='published')
+    user_id = Column(
+        Integer, ForeignKey('users.user_id'), nullable=False)
     subforum_id = Column(
         Integer, ForeignKey('subforums.subforum_id'), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

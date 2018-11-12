@@ -113,7 +113,7 @@ class UserSchema(ModelSchema):
         unknown = EXCLUDE
         model = User
         sqla_session = db.session
-        exclude = ['posts']
+        exclude = ['posts', 'topics']
 
     
 class SubforumSchema(ModelSchema):
@@ -136,7 +136,9 @@ class TopicSchema(ModelSchema):
     topic_id = field_for(Topic, 'topic_id', dump_only=True)
     title = field_for(Topic, 'title', required=True)
     status = field_for(Topic, 'status', required=True)
-    subforum_id = field_for(Topic, 'subforum_id', required=True, load_only=True)
+    user_id = field_for(Topic, 'user_id', required=True, load_only=True)
+    subforum_id = field_for(
+        Topic, 'subforum_id', required=True, load_only=True)
     subforum = Nested(
         SubforumSchema, many=False, exclude=['topics'], dump_only=True)
     created_at = field_for(Topic, 'created_at', dump_only=True)

@@ -22,6 +22,7 @@ api.add_resource(avatars.AvatarRes, '/avatars/<int:avatar_id>')
 api.add_resource(users.UsersRes, '/users')
 api.add_resource(users.UserRes, '/users/<int:user_id>')
 api.add_resource(users.UserPostsRes, '/users/<int:user_id>/posts')
+api.add_resource(users.UserTopicsRes, '/users/<int:user_id>/topics')
 #subforums
 api.add_resource(subforums.SubforumsRes, '/subforums')
 api.add_resource(subforums.SubforumRes, '/subforums/<int:subforum_id>')
