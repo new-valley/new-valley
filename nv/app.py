@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask
+from flask_cors import CORS
 
 from nv.extensions import db, api, jwt
 from nv import config
@@ -17,6 +18,8 @@ def get_app(conf_obj=None):
     register_extensions(app)
     #error handlers
     register_error_handlers(app)
+    #enable CORS
+    CORS(app)
     return app
 
 def register_extensions(app):
