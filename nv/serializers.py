@@ -148,7 +148,7 @@ class TopicSchema(ModelSchema):
 
     @validates('status')
     def check_status(self, status):
-        if not status in Post.VALID_STATUSES:
+        if not status in Topic.VALID_STATUSES:
             raise ValidationError('status \'{}\' is invalid'.format(status))
 
     class Meta:

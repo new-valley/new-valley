@@ -233,7 +233,7 @@ def test_logged_in_client_can_create_post_in_topic(client_with_tok, topic_id):
     assert resp.status_code == 200
 
 
-def test_logged_in_client_gets_correct_fields_in_topic_creation(
+def test_logged_in_client_gets_correct_fields_in_post_creation(
         client_with_tok, topic_id):
     resp = client_with_tok.post('/api/topics/{}/posts'.format(topic_id),
         data={
@@ -251,7 +251,7 @@ def test_logged_in_client_gets_correct_fields_in_topic_creation(
     } == set(resp.json['data'].keys())
 
 
-def test_logged_in_client_correctly_created_post_in_topic(
+def test_logged_in_client_correctly_creates_post_in_topic(
         client_with_tok, topic_id):
     resp = client_with_tok.post('/api/topics/{}/posts'.format(topic_id),
         data={
