@@ -1,8 +1,10 @@
 from nv.database import db
 from sqlalchemy.orm import validates
 from marshmallow import ValidationError
+import random
 
 Column = db.Column
+BigInteger = db.BigInteger
 Integer = db.Integer
 String = db.String
 Text = db.Text
@@ -11,7 +13,6 @@ Table = db.Table
 ForeignKey = db.ForeignKey
 func = db.func
 relationship = db.relationship
-#Base = db.Model
 Table = db.Table
 
 class Base(db.Model):
@@ -28,9 +29,13 @@ class Base(db.Model):
         return obj
 
 
+def get_rand_id():
+    return random.randint(0, 10**18)
+
+
 class Avatar(Base):
     __tablename__ = 'avatars'
-    avatar_id = Column(Integer, primary_key=True)
+    avatar_id = Column(BigInteger, primary_key=True, default=get_rand_id)
     uri = Column(String(256), nullable=False)
     category = Column(String(128), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -55,14 +60,14 @@ class User(Base):
 
     __tablename__ = 'users'
 
-    user_id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, primary_key=True, default=get_rand_id)
     username = Column(String(128), unique=True, nullable=False)
     email = Column(String(128), unique=True, nullable=False)
     password = Column(String(128), nullable=False)
     roles = Column(String(256), nullable=False, default='user')
     status = Column(String(64), nullable=False, default='active')
     avatar_id = Column(
-        Integer, ForeignKey('avatars.avatar_id'), nullable=True)
+        BigInteger, ForeignKey('avatars.avatar_id'), nullable=True)
     signature = Column(String(1024), nullable=False, default='')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -72,7 +77,7 @@ class User(Base):
 
 class Subforum(Base):
     __tablename__ = 'subforums'
-    subforum_id = Column(Integer, primary_key=True)
+    subforum_id = Column(BigInteger, primary_key=True, default=get_rand_id)
     title = Column(String(64), unique=True, nullable=False)
     description = Column(String(128), nullable=False)
     position = Column(Integer, unique=True, nullable=False)
@@ -91,13 +96,13 @@ class Topic(Base):
 
     __tablename__ = 'topics'
 
-    topic_id = Column(Integer, primary_key=True)
+    topic_id = Column(BigInteger, primary_key=True, default=get_rand_id)
     title = Column(String(128), nullable=False)
     status = Column(String(64), nullable=False, default='published')
     user_id = Column(
-        Integer, ForeignKey('users.user_id'), nullable=False)
+        BigInteger, ForeignKey('users.user_id'), nullable=False)
     subforum_id = Column(
-        Integer, ForeignKey('subforums.subforum_id'), nullable=False)
+        BigInteger, ForeignKey('subforums.subforum_id'), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     posts = relationship('Post', backref='topic', lazy=True, cascade='delete')
@@ -125,11 +130,11 @@ class Post(Base):
 
     __tablename__ = 'posts'
 
-    post_id = Column(Integer, primary_key=True)
+    post_id = Column(BigInteger, primary_key=True, default=get_rand_id)
     user_id = Column(
-        Integer, ForeignKey('users.user_id'), nullable=False)
+        BigInteger, ForeignKey('users.user_id'), nullable=False)
     topic_id = Column(
-        Integer, ForeignKey('topics.topic_id'), nullable=False)
+        BigInteger, ForeignKey('topics.topic_id'), nullable=False)
     content = Column(Text, nullable=False, default='')
     status = Column(String(64), nullable=False, default='published')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -152,7 +157,7 @@ class Post(Base):
 
 class RevokedToken(Base):
     __tablename__ = 'revoked_tokens'
-    revoked_token_id = Column(Integer, primary_key=True)
+    revoked_token_id = Column(BigInteger, primary_key=True, default=get_rand_id)
     jti = Column(String(120))
 
     @classmethod

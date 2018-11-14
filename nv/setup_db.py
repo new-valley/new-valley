@@ -58,7 +58,7 @@ def create_su(app, passwd=''):
             'length of password < {}'.format(config.min_password_len))
     with app.app_context():
         create_avatar(app)
-        avatar = Avatar.query.get(1)
+        avatar = Avatar.query.first()
         User.create_and_save(
             username='su',
             password=generate_hash(passwd),
