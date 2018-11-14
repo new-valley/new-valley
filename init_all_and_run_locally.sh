@@ -16,6 +16,7 @@ source venv/bin/activate
 pip install -r ./requirements.txt
 
 #fake db data generation, db init and population
+mkdir -p data/
 ./gen_fake_data.py
 ./setup_db.sh --reset_db --create_su --su_passwd=rosquinha
 ./populate_db.sh

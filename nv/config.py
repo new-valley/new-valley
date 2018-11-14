@@ -24,8 +24,6 @@ ignore_jwt_texts = (not True) if _is_dev() else False
 ignore_jwt_images = (not True) if _is_dev() else False
 ignore_jwt_auth = (not True) if _is_dev() else False
 
-min_password_len = 8
-
 superusers = {
     'su',
 }

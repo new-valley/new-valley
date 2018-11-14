@@ -15,8 +15,9 @@ from nv.util import generate_hash
 def get_pass(prompt, max_n_trials=3):
     for i in range(max_n_trials):
         pass_1 = getpass.getpass(prompt)
-        if len(pass_1) < config.min_password_len:
-            print('passw too short (min = {})'.format(config.min_password_len))
+        if len(pass_1) < User.MIN_UNHASHED_PASSWORD_LEN:
+            print('passw too short (min = {})'.format(
+                User.MIN_UNHASHED_PASSWORD_LEN))
             continue
         pass_2 = getpass.getpass('enter again: ')
         if pass_1 != pass_2:
@@ -53,9 +54,9 @@ def create_avatar(app):
 def create_su(app, passwd=''):
     if not passwd:
         passwd = get_pass('enter superuser password: ')
-    elif len(passwd) < config.min_password_len:
+    elif len(passwd) < User.MIN_UNHASHED_PASSWORD_LEN:
         raise ValueError(
-            'length of password < {}'.format(config.min_password_len))
+            'length of password < {}'.format(User.MIN_UNHASHED_PASSWORD_LEN))
     with app.app_context():
         create_avatar(app)
         avatar = Avatar.query.first()
