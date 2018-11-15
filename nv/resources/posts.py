@@ -26,6 +26,10 @@ from nv.serializers import (
 from nv.util import (
     mk_errors,
 )
+from nv.permissions import (
+    EditPost,
+    DeletePost,
+)
 from nv.database import db
 from nv import config
 from nv.resources.common import (
@@ -37,27 +41,8 @@ from nv.resources.common import (
     generic_delete,
     get_user,
     get_obj,
-    is_admin,
-    is_moderator,
+    check_permissions,
 )
-
-
-def _user_can_create_post(user, topic):
-    return is_admin(user) or is_moderator(user) \
-        or (user.status == 'active' and topic.status == 'published')
-
-
-def _user_can_edit_post(user, post, topic):
-    is_author_and_can_edit = user.status == 'active' \
-        and topic.status == 'published' \
-        and post.status == 'published' \
-        and user.user_id == post.user_id
-    return is_admin(user) or is_moderator(user) or is_author_and_can_edit
-
-
-def _user_can_delete_post(user, post, topic):
-    return is_admin(user) or is_moderator(user) or \
-        user.user_id == post.user_id
 
 
 class PostsRes(Resource):
@@ -84,9 +69,9 @@ class PostRes(Resource):
         user = get_user(username=get_jwt_identity())
         post = get_obj(Post.query.filter_by(post_id=post_id))
         topic = get_obj(Topic.query.filter_by(topic_id=post.topic_id))
-        #only the user itself/admins/mods can perform the operation
-        if not _user_can_delete_post(user, post, topic):
-            return mk_errors(401, 'operation not allowed for user')
+        check_permissions(user, [
+            DeletePost(post),
+        ])
         ret = generic_delete(
             obj=post,
         )
@@ -97,12 +82,9 @@ class PostRes(Resource):
         user = get_user(username=get_jwt_identity())
         post = get_obj(Post.query.filter_by(post_id=post_id))
         topic = get_obj(Topic.query.filter_by(topic_id=post.topic_id))
-        #only the user itself/admins/mods can perform the operation
-        if not _user_can_edit_post(user, post, topic):
-            return mk_errors(401, 'operation not allowed for user')
-        if {'status', 'created_at'} <= set(request.form.keys()) \
-            and not (is_admin(post) or is_moderator(post)):
-            return mk_errors(401, 'operation not allowed for user')
+        check_permissions(user, [
+            EditPost(post, attributes=set(request.form)),
+        ])
         ret = generic_put(
             obj=post,
             schema=PostSchema(exclude=('user_id', 'topic_id')),

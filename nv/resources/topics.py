@@ -29,6 +29,11 @@ from nv.util import (
     mk_errors,
     fmt_validation_error_messages,
 )
+from nv.permissions import (
+    EditTopic,
+    DeleteTopic,
+    CreatePostInTopic,
+)
 from nv.database import db
 from nv import config
 from nv.resources.common import (
@@ -40,26 +45,8 @@ from nv.resources.common import (
     generic_delete,
     get_user,
     get_obj,
-    is_admin,
-    is_moderator,
+    check_permissions,
 )
-
-
-def _user_can_delete_topic(user, topic):
-    return is_admin(user) or is_moderator(user) or \
-        user.user_id == topic.user_id
-
-
-def _user_can_edit_topic(user, topic):
-    is_author_and_can_edit = user.user_id == topic.user_id \
-        and user.status == 'active' \
-        and topic.status == 'published'
-    return is_admin(user) or is_moderator(user) or is_author_and_can_edit
-
-
-def _user_can_create_post(user, topic):
-    return is_admin(user) or is_moderator(user) \
-        or (user.status == 'active' and topic.status == 'published')
 
 
 class TopicsRes(Resource):
@@ -71,28 +58,6 @@ class TopicsRes(Resource):
             **args,
         )
         return objs
-
-    '''@jwt_required
-    def post(self):
-        user = get_user(username=get_jwt_identity())
-        #validating/updating data
-        data = {k: v[0] for k, v in dict(request.form).items()}
-        data['user_id'] = user.user_id
-        schema = TopicSchema()
-        errors = schema.validate(data)
-        if errors:
-            return mk_errors(400, fmt_validation_error_messages(errors))
-        #check if subforum exists
-        subforum = get_obj(
-            Subforum.query.filter_by(subforum_id=data['subforum_id']))
-        #checking if user can create topic
-        if not _user_can_create_topic(user, subforum):
-            return mk_errors(400, 'user cannot create topic')
-        ret = generic_post(
-            schema=schema,
-            data=data,
-        )
-        return ret'''
 
 
 class TopicRes(Resource):
@@ -107,9 +72,9 @@ class TopicRes(Resource):
     def delete(self, topic_id):
         user = get_user(username=get_jwt_identity())
         topic = get_obj(Topic.query.filter_by(topic_id=topic_id))
-        #only the author of the topic or mods/admins can delete
-        if not _user_can_delete_topic(user, topic):
-            return mk_errors(401, 'operation not allowed for user in topic')
+        check_permissions(user, [
+            DeleteTopic(topic),
+        ])
         ret = generic_delete(
             obj=topic,
         )
@@ -120,13 +85,9 @@ class TopicRes(Resource):
         user = get_user(username=get_jwt_identity())
         topic = get_obj(
             Topic.query.filter_by(topic_id=topic_id), 'topic not found')
-        #only the topic itself/admins can perform the operation
-        if not _user_can_edit_topic(user, topic):
-            return mk_errors(401, 'operation not allowed for user in topic')
-        #only moderator/admin can alter these properties
-        if {'status', 'created_at'} <= set(request.form.keys()) \
-            and not (is_admin(user) or is_moderator(user)):
-            return mk_errors(401, 'operation not allowed for user in topic')
+        check_permissions(user, [
+            EditTopic(topic, attributes=set(request.form)),
+        ])
         ret = generic_put(
             obj=topic,
             schema=TopicSchema(),
@@ -149,10 +110,12 @@ class TopicPostsRes(Resource):
 
     @jwt_required
     def post(self, topic_id):
-        topic = Topic.query.get(topic_id)
-        if topic is None:
-            return mk_errors(404, 'topic does not exist')
+        topic = get_obj(
+            Topic.query.filter_by(topic_id=topic_id), 'topic does not exist')
         user = get_user(username=get_jwt_identity())
+        check_permissions(user, [
+            CreatePostInTopic(topic),
+        ])
         #validating/updating data
         data = {k: v[0] for k, v in dict(request.form).items()}
         data['user_id'] = user.user_id
@@ -161,9 +124,6 @@ class TopicPostsRes(Resource):
         errors = schema.validate(data)
         if errors:
             return mk_errors(400, fmt_validation_error_messages(errors))
-        #checking if user can create post
-        if not _user_can_create_post(user, topic):
-            return mk_errors(400, 'user cannot create post')
         ret = generic_post(
             schema=schema,
             data=data,

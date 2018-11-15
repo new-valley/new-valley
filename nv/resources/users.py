@@ -28,8 +28,11 @@ from nv.resources.common import (
     generic_put,
     generic_delete,
     get_user,
-    is_admin,
-    is_moderator,
+    check_permissions,
+)
+from nv.permissions import (
+    DeleteUser,
+    EditUser,
 )
 from nv.database import db
 from nv import config
@@ -69,9 +72,9 @@ class UserRes(Resource):
     def delete(self, user_id):
         user = get_user(username=get_jwt_identity())
         target_user = get_user(user_id=user_id)
-        #only the user itself/admins can perform the operation
-        if user.user_id != target_user.user_id and not is_admin(user):
-            return mk_errors(401, 'operation not allowed for user')
+        check_permissions(user, [
+            DeleteUser(target_user),
+        ])
         ret = generic_delete(
             obj=target_user,
         )
@@ -81,13 +84,10 @@ class UserRes(Resource):
     def put(self, user_id):
         user = get_user(username=get_jwt_identity())
         target_user = get_user(user_id=user_id)
-        #only the user itself/admins can perform the operation
-        if user.user_id != target_user.user_id and not is_admin(user):
-            return mk_errors(401, 'operation not allowed for user')
-        #only moderator/admin can alter these properties
-        if {'roles', 'status', 'created_at'} <= set(request.form.keys()) \
-            and not (is_admin(user) or is_moderator(user)):
-            return mk_errors(401, 'operation not allowed for user')
+        #EditUser(target=target_user, attributes=set(request.form)).check(user)
+        check_permissions(user, [
+            EditUser(target_user, attributes=set(request.form)),
+        ])
         ret = generic_put(
             obj=target_user,
             schema=UserSchema(),

@@ -27,6 +27,12 @@ from nv.serializers import (
 from nv.util import (
     mk_errors,
 )
+from nv.permissions import (
+    CreateSubforum,
+    EditSubforum,
+    DeleteSubforum,
+    CreateTopicInSubforum,
+)
 from nv.database import db
 from nv import config
 from nv.resources.common import (
@@ -38,13 +44,8 @@ from nv.resources.common import (
     generic_delete,
     get_user,
     get_obj,
-    is_admin,
-    is_moderator,
+    check_permissions,
 )
-
-
-def _user_can_create_topic(user, subforum=None):
-    return is_admin(user) or is_moderator(user) or user.status == 'active'
 
 
 class SubforumsRes(Resource):
@@ -57,7 +58,12 @@ class SubforumsRes(Resource):
         )
         return objs
 
+    @jwt_required
     def post(self):
+        user = get_user(username=get_jwt_identity())
+        check_permissions(user, [
+            CreateSubforum(),
+        ])
         data = {k: v[0] for k, v in dict(request.form).items()}
         if not 'position' in data:
             subforum = Subforum.query.order_by(-Subforum.position).first()
@@ -82,9 +88,9 @@ class SubforumRes(Resource):
     def delete(self, subforum_id):
         user = get_user(username=get_jwt_identity())
         subforum = get_obj(Subforum.query.filter_by(subforum_id=subforum_id))
-        #only admins/mods can perform the operation
-        if not is_admin(user):
-            return mk_errors(401, 'operation not allowed for user')
+        check_permissions(user, [
+            DeleteSubforum(subforum),
+        ])
         ret = generic_delete(
             obj=subforum,
         )
@@ -94,9 +100,9 @@ class SubforumRes(Resource):
     def put(self, subforum_id):
         user = get_user(username=get_jwt_identity())
         subforum = get_obj(Subforum.query.filter_by(subforum_id=subforum_id))
-        #only the user itself/admins/mods can perform the operation
-        if not is_admin(user):
-            return mk_errors(401, 'operation not allowed for user')
+        check_permissions(user, [
+            EditSubforum(subforum, attributes=set(request.form)),
+        ])
         ret = generic_put(
             obj=subforum,
             schema=SubforumSchema(),
@@ -123,6 +129,9 @@ class SubforumTopicsRes(Resource):
         subforum = get_obj(Subforum.query.filter_by(subforum_id=subforum_id),
             'subforum does not exist')
         user = get_user(username=get_jwt_identity())
+        check_permissions(user, [
+            CreateTopicInSubforum(subforum),
+        ])
         #validating/updating data
         data = {k: v[0] for k, v in dict(request.form).items()}
         data['user_id'] = user.user_id
@@ -131,9 +140,6 @@ class SubforumTopicsRes(Resource):
         errors = schema.validate(data)
         if errors:
             return mk_errors(400, fmt_validation_error_messages(errors))
-        #checking if user can create post
-        if not _user_can_create_topic(user, subforum):
-            return mk_errors(400, 'user cannot create topic')
         ret = generic_post(
             schema=schema,
             data=data,

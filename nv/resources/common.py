@@ -159,3 +159,10 @@ def is_admin(user):
 
 def is_moderator(user):
     return 'moderator' in user.roles.split(',')
+
+
+def check_permissions(user, permissions):
+    if not isinstance(permissions, (list, tuple)):
+        permissions = [permissions]
+    for permission in permissions:
+        permission.check(user)

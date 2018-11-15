@@ -9,6 +9,11 @@ def jwt_error_handler(error):
     messages = list(getattr(error, 'args', []))
     return mk_errors(code, messages)
 
+def permission_error_handler(error):
+    code = 401
+    messages = list(getattr(error, 'args', ['permission denied for action']))
+    return mk_errors(code, messages)
+
 def http_error_handler(error):
     resp = error.response
     if resp is None:
@@ -44,6 +49,8 @@ def error_handler(error):
             return http_error_handler(error)
         elif isinstance(error, ValidationError):
             return validation_error_handler(error)
+        elif isinstance(error, PermissionError):
+            return permission_error_handler(error)
         else:
             return generic_error_handler(error)
     except:

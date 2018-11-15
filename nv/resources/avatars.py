@@ -21,6 +21,11 @@ from nv.serializers import (
 from nv.util import (
     mk_errors,
 )
+from nv.permissions import (
+    CreateAvatar,
+    EditAvatar,
+    DeleteAvatar,
+)
 from nv.database import db
 from nv import config
 from nv.resources.common import (
@@ -31,8 +36,8 @@ from nv.resources.common import (
     generic_put,
     generic_delete,
     get_user,
-    is_admin,
-    is_moderator,
+    get_obj,
+    check_permissions,
 )
 
 class AvatarsRes(Resource):
@@ -48,8 +53,9 @@ class AvatarsRes(Resource):
     @jwt_required
     def post(self):
         user = get_user(username=get_jwt_identity())
-        if not is_admin(user):
-            return mk_errors(401, 'operation not allowed for user')
+        check_permissions(user, [
+            CreateAvatar(),
+        ])
         ret = generic_post(
             schema=AvatarSchema(),
             data=request.form,
@@ -67,8 +73,11 @@ class AvatarRes(Resource):
     @jwt_required
     def delete(self, avatar_id):
         user = get_user(username=get_jwt_identity())
-        if not is_admin(user):
-            return mk_errors(401, 'operation not allowed for user')
+        avatar = get_obj(Avatar.query.filter_by(avatar_id=avatar_id),
+            'avatar does not exist')
+        check_permissions(user, [
+            DeleteAvatar(avatar),
+        ])
         ret = generic_delete(
             obj=Avatar.query.get(avatar_id),
         )
@@ -77,8 +86,11 @@ class AvatarRes(Resource):
     @jwt_required
     def put(self, avatar_id):
         user = get_user(username=get_jwt_identity())
-        if not is_admin(user):
-            return mk_errors(401, 'operation not allowed for user')
+        avatar = get_obj(Avatar.query.filter_by(avatar_id=avatar_id),
+            'avatar does not exist')
+        check_permissions(user, [
+            EditAvatar(avatar, attributes=set(request.form)),
+        ])
         ret = generic_put(
             obj=Avatar.query.get(avatar_id),
             schema=AvatarSchema(),

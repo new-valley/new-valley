@@ -66,7 +66,7 @@ def create_su(app, passwd=''):
             email='su@nv.com',
             signature='usuario banido, abracos',
             avatar_id=avatar.avatar_id,
-            roles='user, moderator',
+            roles='admin,moderator,user',
         )
 
 def main():
