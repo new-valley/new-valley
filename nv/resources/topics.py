@@ -45,6 +45,7 @@ from nv.resources.common import (
     get_user,
     get_obj,
     check_permissions,
+    check_post_time_interval,
 )
 
 
@@ -115,6 +116,7 @@ class TopicPostsRes(Resource):
         check_permissions(user, [
             CreatePostInTopic(topic),
         ])
+        check_post_time_interval(user, Post)
         #validating/updating data
         data = {k: v[0] for k, v in dict(request.form).items()}
         data['user_id'] = user.user_id

@@ -1,3 +1,6 @@
+import time
+
+
 def test_client_can_get_topics(client):
     resp = client.get('/api/topics')
     assert resp.status_code == 200
@@ -261,3 +264,25 @@ def test_logged_in_client_correctly_creates_post_in_topic(
     assert resp.json['data']['status'] == 'published'
     assert resp.json['data']['content'] == 'olar'
     assert resp.json['data']['topic']['topic_id'] == topic_id
+
+
+def test_logged_in_client_under_antiflood_cannot_post_in_interval(
+        client_with_tok_under_antifloood, antiflood_time, topic_id):
+    time.sleep(antiflood_time)
+    start_time = time.time()
+    resp_1 = client_with_tok_under_antifloood.post(
+        '/api/topics/{}/posts'.format(topic_id),
+        data={
+            'content': 'olar',
+        }
+    )
+    resp_2 = client_with_tok_under_antifloood.post(
+        '/api/topics/{}/posts'.format(topic_id),
+        data={
+            'content': 'olar2',
+        }
+    )
+    end_time = time.time()
+    assert end_time - start_time < antiflood_time
+    assert resp_1.status_code == 200
+    assert resp_2.status_code == 429

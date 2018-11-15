@@ -103,3 +103,7 @@ def get_datetime(datetime):
     datetime = arrow.get(datetime).datetime
     datetime = datetime.astimezone(get_utc_tz())
     return datetime
+
+
+def get_now():
+    return get_datetime(dt.datetime.now(get_utc_tz()))

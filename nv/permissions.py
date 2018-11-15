@@ -198,3 +198,8 @@ class DeletePost(DeleteTarget):
             return True
         else:
             return _is_admin_or_moderator(user)
+
+
+class BypassAntiFlood(Permission):
+    def is_granted(user):
+        return _is_active_admin_or_moderator(user)

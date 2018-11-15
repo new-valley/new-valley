@@ -1,3 +1,4 @@
+from werkzeug.exceptions import TooManyRequests
 from webargs.flaskparser import parser
 from webargs.fields import (
     Str,
@@ -13,12 +14,16 @@ from nv.models import (
     User,
 )
 from flask import abort
+from flask import current_app
 from nv.util import (
     filter_fields,
     mk_errors,
     fmt_validation_error_messages,
+    get_now,
+    get_datetime,
 )
 from nv.database import db
+from nv.permissions import BypassAntiFlood
 
 
 def crop_query(query, offset=None, max_n_results=None):
@@ -163,3 +168,15 @@ def check_permissions(user, permissions):
         permissions = [permissions]
     for permission in permissions:
         permission.check(user)
+
+
+def check_post_time_interval(user, model_cls):
+    if BypassAntiFlood.is_granted(user):
+        return
+    last_post = order_query(
+        model_cls.query.filter_by(user_id=user.user_id), by='newest').first()
+    if last_post is None:
+        return
+    timedelta = get_now() - get_datetime(last_post.created_at)
+    if timedelta.seconds < current_app.config['MIN_POST_TIME_INTERVAL']:
+        raise TooManyRequests('not outside minimum time interval for posting')

@@ -1,11 +1,13 @@
 alabaster==0.7.12
 aniso8601==4.0.1
+arrow==0.12.1
 atomicwrites==1.2.1
 attrs==18.2.0
 Babel==2.6.0
 certifi==2018.10.15
 chardet==3.0.4
 Click==7.0
+DateTime==4.3
 docutils==0.14
 Flask==1.0.2
 Flask-Cors==3.0.7
@@ -30,6 +32,7 @@ Pygments==2.2.0
 PyJWT==1.6.4
 pyparsing==2.3.0
 pytest==3.10.0
+python-dateutil==2.7.5
 pytz==2018.7
 PyYAML==3.13
 requests==2.20.1
@@ -41,3 +44,4 @@ SQLAlchemy==1.2.13
 urllib3==1.24.1
 webargs==4.1.2
 Werkzeug==0.14.1
+zope.interface==4.6.0

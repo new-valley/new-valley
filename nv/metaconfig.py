@@ -22,9 +22,6 @@ def _get_var(key, default=None, conf=os.environ):
     return conf.get(key, default)
 
 
-debug = _is_dev()
-
-
 class BaseAppConfig:
     ENV = _env
     PROPAGATE_EXCEPTIONS = True
@@ -33,6 +30,9 @@ class BaseAppConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_EXPIRATION_DELTA = dt.timedelta(
         hours=int(os.environ.get('NEWVALLEY_JWT_EXPIRATION_DELTA_HOURS', 24)))
+    #minimum posting time interval in seconds for posts and topics creation
+    MIN_POST_TIME_INTERVAL = int(
+        os.environ.get('NEWVALLEY_MIN_POST_TIME_INTERVAL', 30))
 
 
 def get_app_config_class(**override_environ):
@@ -60,4 +60,5 @@ def get_app_test_config_class(**override_environ):
         SECRET_KEY = 'secret'
         JWT_SECRET_KEY = 'jwtsecret'
         SQLALCHEMY_DATABASE_URI = 'sqlite://'
+        MIN_POST_TIME_INTERVAL = 0
     return AppTestConfig

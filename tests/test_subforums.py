@@ -1,3 +1,6 @@
+import time
+
+
 def test_client_can_get_subforums(client):
     resp = client.get('/api/subforums')
     assert resp.status_code == 200
@@ -228,3 +231,25 @@ def test_logged_in_client_correctly_creates_topic_in_subforum(
     assert resp.json['data']['status'] == 'published'
     assert resp.json['data']['title'] == 'olar'
     assert resp.json['data']['subforum']['subforum_id'] == subforum_id
+
+
+def test_logged_in_client_under_antiflood_cannot_post_in_interval(
+        client_with_tok_under_antifloood, antiflood_time, subforum_id):
+    time.sleep(antiflood_time)
+    start_time = time.time()
+    resp_1 = client_with_tok_under_antifloood.post(
+        '/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'olar',
+        }
+    )
+    resp_2 = client_with_tok_under_antifloood.post(
+        '/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'olar2',
+        }
+    )
+    end_time = time.time()
+    assert end_time - start_time < antiflood_time
+    assert resp_1.status_code == 200
+    assert resp_2.status_code == 429

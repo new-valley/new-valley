@@ -240,7 +240,8 @@ def refresh_token(app):
     yield _refresh_token_getter(app)()
 
 
-def _client_with_tok_getter(app):
+def _client_with_tok_getter(app, **app_config):
+    app.config.update(**app_config)
     def wrapper(username='user'):
         with app.test_client() as c:
             with app.app_context():
@@ -253,8 +254,9 @@ def _client_with_tok_getter(app):
     return wrapper
 
 
-def _client_with_refresh_tok_getter(app):
-    def wrapper(username='user'):
+def _client_with_refresh_tok_getter(app, **app_config):
+    app.config.update(**app_config)
+    def wrapper(username='user', **app_config):
         with app.test_client() as c:
             with app.app_context():
                 token = create_refresh_token(identity=username)
@@ -274,6 +276,16 @@ def client_with_tok_getter(app):
 @pytest.fixture()
 def client_with_tok(app):
     yield _client_with_tok_getter(app)()
+
+
+@pytest.fixture()
+def client_with_tok_under_antifloood(app):
+    yield _client_with_tok_getter(app, MIN_POST_TIME_INTERVAL=0.3)()
+
+
+@pytest.fixture()
+def antiflood_time():
+    yield 1
 
 
 @pytest.fixture()
