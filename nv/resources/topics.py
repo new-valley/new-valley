@@ -21,7 +21,7 @@ from nv.models import (
     Subforum,
     Post,
 )
-from nv.serializers import (
+from nv.schemas import (
     TopicSchema,
     PostSchema,
 )

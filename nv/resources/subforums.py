@@ -20,7 +20,7 @@ from nv.models import (
     Subforum,
     Topic,
 )
-from nv.serializers import (
+from nv.schemas import (
     SubforumSchema,
     TopicSchema,
 )

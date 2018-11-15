@@ -17,7 +17,7 @@ from nv.util import (
     verify_hash,
 )
 from nv.models import User, RevokedToken
-from nv.serializers import UserSchema
+from nv.schemas import UserSchema
 from nv.database import db
 from nv.extensions import jwt
 

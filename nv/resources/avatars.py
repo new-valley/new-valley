@@ -15,7 +15,7 @@ from webargs import validate
 from nv.models import (
     Avatar,
 )
-from nv.serializers import (
+from nv.schemas import (
     AvatarSchema,
 )
 from nv.util import (

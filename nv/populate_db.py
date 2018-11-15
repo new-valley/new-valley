@@ -3,7 +3,7 @@
 
 from nv import app
 from nv.models import Avatar, User, Subforum, Post, Topic
-from nv.serializers import (
+from nv.schemas import (
     AvatarSchema,
     UserSchema,
     SubforumSchema,

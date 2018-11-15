@@ -12,7 +12,7 @@ from nv.models import (
     Post,
     Topic,
 )
-from nv.serializers import (
+from nv.schemas import (
     UserSchema,
     PostSchema,
     TopicSchema,

@@ -20,7 +20,7 @@ from nv.models import (
     Post,
     Topic,
 )
-from nv.serializers import (
+from nv.schemas import (
     PostSchema,
 )
 from nv.util import (
