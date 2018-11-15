@@ -48,7 +48,7 @@ class LocalizedDateTime(DateTime):
 
 
 class AvatarSchema(ModelSchema):
-    avatar_id = field_for(Avatar, 'avatar_id', dump_only=True)
+    avatar_id = String(dump_only=True)
     uri = field_for(Avatar, 'uri', required=True)
     category = field_for(Avatar, 'category', required=True)
     created_at = LocalizedDateTime(dump_only=True)
@@ -67,7 +67,7 @@ def _split_by_commas(string):
 
 
 class UserSchema(ModelSchema):
-    user_id = field_for(User, 'user_id', dump_only=True)
+    user_id = String(dump_only=True)
     username = field_for(User, 'username', required=True)
     password = field_for(User, 'password', required=True, load_only=True)
     email = Email(required=True, load_only=True)
@@ -131,9 +131,9 @@ class UserSchema(ModelSchema):
         sqla_session = db.session
         exclude = ['posts', 'topics']
 
-    
+
 class SubforumSchema(ModelSchema):
-    subforum_id = field_for(Subforum, 'subforum_id', dump_only=True)
+    subforum_id = String(dump_only=True)
     title = field_for(Subforum, 'title', required=True)
     description = field_for(Subforum, 'description', required=True)
     position = field_for(
@@ -149,7 +149,7 @@ class SubforumSchema(ModelSchema):
 
 
 class TopicSchema(ModelSchema):
-    topic_id = field_for(Topic, 'topic_id', dump_only=True)
+    topic_id = String(dump_only=True)
     title = field_for(Topic, 'title', required=True)
     status = field_for(Topic, 'status')
     user_id = field_for(Topic, 'user_id', required=True, load_only=True)
@@ -175,7 +175,7 @@ class TopicSchema(ModelSchema):
 
 
 class PostSchema(ModelSchema):
-    post_id = field_for(Post, 'post_id', dump_only=True)
+    post_id = String(dump_only=True)
     content = field_for(Post, 'content', required=True)
     status = field_for(Post, 'status')
     user_id = field_for(Post, 'user_id', required=True, load_only=True)

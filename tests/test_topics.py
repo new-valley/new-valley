@@ -263,7 +263,7 @@ def test_logged_in_client_correctly_creates_post_in_topic(
     )
     assert resp.json['data']['status'] == 'published'
     assert resp.json['data']['content'] == 'olar'
-    assert resp.json['data']['topic']['topic_id'] == topic_id
+    assert resp.json['data']['topic']['topic_id'] == str(topic_id)
 
 
 def test_logged_in_client_under_antiflood_cannot_post_in_interval(

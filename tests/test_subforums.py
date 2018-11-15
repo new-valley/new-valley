@@ -230,7 +230,7 @@ def test_logged_in_client_correctly_creates_topic_in_subforum(
     )
     assert resp.json['data']['status'] == 'published'
     assert resp.json['data']['title'] == 'olar'
-    assert resp.json['data']['subforum']['subforum_id'] == subforum_id
+    assert resp.json['data']['subforum']['subforum_id'] == str(subforum_id)
 
 
 def test_logged_in_client_under_antiflood_cannot_post_in_interval(
