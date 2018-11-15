@@ -10,13 +10,34 @@ from nv.schemas import (
     PostSchema,
     TopicSchema
 )
+from nv.models import (
+    Avatar,
+    User,
+    Subforum,
+    Post,
+    Topic
+)
 from nv.database import db
+from nv.util import get_datetime, flatten
+from flask import current_app
 import os
 import json
 import random
+import math
+import multiprocessing as mp
+from functools import partial
+import argparse
 
 
-FAKE_DATA_PATH = os.path.join('data', 'fake-data.json')
+DEF_SRC_PATH = os.path.join('data', 'fake-data.json')
+DEF_MAX_CHUNK_SIZE = 100000
+DEF_N_THREADS = mp.cpu_count()
+
+
+def partition(lst, chunk_size):
+    lsts = [lst[i:i+chunk_size] for i in range(0, len(lst), chunk_size)]
+    #lsts = [l for l in lsts if l]
+    return lsts
 
 
 def get_app(**conf):
@@ -24,79 +45,129 @@ def get_app(**conf):
 
 
 def populate(schema, data):
+    objs = schema.load(data)
+    if not objs:
+        return
+
+
+def _add_all(objs, data):
+    #if present, updating objects with some fields that are not loaded
+    #by default by schemas
+    id_field = '{}_id'.format(objs[0].__class__.__name__.lower())
+    for obj, dct in zip(objs, data):
+        if 'created_at' in dct:
+            obj.created_at = get_datetime(dct['created_at'])
+        if 'updated_at' in dct:
+            obj.updated_at = get_datetime(dct['updated_at'])
+        if id_field in dct:
+            setattr(obj, id_field, dct[id_field])
+    db.session.flush()
+    db.session.add_all(objs)
+    db.session.commit()
+
+
+def add_all(objs):
+    db.session.flush()
+    db.session.add_all(objs)
+    db.session.commit()
+
+
+def deserialize(data, model_cls=None):
+    new_dct = {}
+    for k, v in data.items():
+        if k.endswith('_id'):
+            new_dct[k] = int(v)
+        elif k.endswith('_at'):
+            new_dct[k] = get_datetime(v)
+        else:
+            new_dct[k] = str(v)
+    obj = new_dct if model_cls is None else model_cls(**new_dct)
+    return obj
+
+
+def deserialize_all(data, model_cls, n_threads):
+    #return [deserialize(d, model_cls) for d in data]
+    fn = partial(deserialize, model_cls=model_cls)
+    pool = mp.Pool(n_threads)
+    objs = pool.map(fn, data)
+    pool.close()
+    pool.join()
+    return objs
+
+
+def deserialize_and_add_all(data, model_cls, n_threads):
+    objs = deserialize_all(data, model_cls, n_threads)
+    add_all(objs)
+
+
+MODELS = {
+    'avatars': Avatar,
+    'users': User,
+    'subforums': Subforum,
+    'topics': Topic,
+    'posts': Post,
+}
+
+
+def populate(data, n, total, n_threads):
+    for key in ['avatars', 'users', 'subforums', 'topics', 'posts']:
+        print('[{}/{}] populating {}...'.format(n, total, key), flush=True)
+        deserialize_and_add_all(data[key], MODELS[key], n_threads)
+
+
+def partition_dict_of_lists(data, max_chunk_size):
+    n_divs = max(math.ceil(len(v)/max_chunk_size) for v in data.values())
+    dct = {}
+    for key, val in data.items():
+        chunk_size = math.ceil(len(val)/n_divs)
+        dct[key] = partition(val, chunk_size)
+        dct[key].extend([] for __ in range(n_divs - len(dct[key])))
+    subsets = [{k: dct[k][i] for k in dct.keys()} for i in range(n_divs)]
+    return subsets
+
+
+def populate_db(src_path, n_threads, max_chunk_size):
+    with open(src_path) as f:
+        data = json.load(f)
+
     with get_app().app_context():
-        objs = schema.load(data)
-        db.session.add_all(objs)
-        db.session.commit()
+        print('populating for env "{}"'.format(current_app.config['ENV']))
+        subsets = partition_dict_of_lists(data, max_chunk_size)
+        for i, subset in enumerate(subsets):
+            populate(subset, i+1, len(subsets), n_threads)
 
-
-def populate_avatars(data):
-    populate(AvatarSchema(many=True), data['avatars'])
-
-
-def populate_users(data):
-    with get_app().app_context():
-        avatars = Avatar.query.all()
-    users = data['users']
-    for user in users:
-        del user['avatar']
-        user['avatar_id'] = random.choice(avatars).avatar_id
-    populate(UserSchema(many=True), users)
-
-
-def populate_subforums(data):
-    populate(SubforumSchema(many=True), data['subforums'])
-
-
-def populate_topics(data):
-    with get_app().app_context():
-        subforums = Subforum.query.all()
-        users = User.query.all()
-    topics = data['topics']
-    for topic in topics:
-        del topic['subforum']
-        topic['subforum_id'] = random.choice(subforums).subforum_id
-        del topic['user']
-        topic['user_id'] = random.choice(users).user_id
-    populate(TopicSchema(many=True), topics)
-
-
-def populate_posts(data):
-    with get_app().app_context():
-        topics = Topic.query.all()
-        users = User.query.all()
-    posts = data['posts']
-    for post in posts:
-        del post['user']
-        del post['topic']
-        post['user_id'] = random.choice(users).user_id
-        post['topic_id'] = random.choice(topics).topic_id
-    populate(PostSchema(many=True), posts)
-
-
-def populate_db(data):
-    print('populating avatars...', flush=True, end=' ')
-    populate_avatars(data)
-    print('done')
-    print('populating users...', flush=True, end=' ')
-    populate_users(data)
-    print('done')
-    print('populating subforums...', flush=True, end=' ')
-    populate_subforums(data)
-    print('done')
-    print('populating topics...', flush=True, end=' ')
-    populate_topics(data)
-    print('done')
-    print('populating posts...', flush=True, end=' ')
-    populate_posts(data)
-    print('done')
-    return
+    print('successfully populated.')
 
 
 def main():
-    with open(FAKE_DATA_PATH) as f:
-        data = json.load(f)
-    populate_db(data)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'src_path',
+        nargs='?',
+        help='path to fake data JSON file (default={})'.format(DEF_SRC_PATH),
+        default=DEF_SRC_PATH,
+    )
+    parser.add_argument(
+        '--n_threads',
+        help='number of threads to use in deserialization (default={})'.format(
+            DEF_N_THREADS),
+        type=int,
+        default=DEF_N_THREADS,
+    )
+    parser.add_argument(
+        '--max_chunk_size',
+        help='maximum chunk size to proccess at once in memory ({})'.format(
+            DEF_MAX_CHUNK_SIZE),
+        type=int,
+        default=DEF_MAX_CHUNK_SIZE,
+    )
+    args = parser.parse_args()
+
+    populate_db(
+        src_path=args.src_path,
+        n_threads=args.n_threads,
+        max_chunk_size=args.max_chunk_size
+    )
 
 
 if __name__ == '__main__':
