@@ -279,13 +279,14 @@ def client_with_tok(app):
 
 
 @pytest.fixture()
-def client_with_tok_under_antifloood(app):
-    yield _client_with_tok_getter(app, MIN_POST_TIME_INTERVAL=0.3)()
+def antiflood_time():
+    yield 2
 
 
 @pytest.fixture()
-def antiflood_time():
-    yield 1
+def client_with_tok_under_antifloood(app, antiflood_time):
+    yield _client_with_tok_getter(
+        app, MIN_POST_TIME_INTERVAL=antiflood_time)('user')
 
 
 @pytest.fixture()

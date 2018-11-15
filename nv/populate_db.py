@@ -149,7 +149,7 @@ def main():
     )
     parser.add_argument(
         '--n_threads',
-        help='number of threads to use in deserialization (default={})'.format(
+        help='number of threads to use in deserialization ({})'.format(
             DEF_N_THREADS),
         type=int,
         default=DEF_N_THREADS,

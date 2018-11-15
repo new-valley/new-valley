@@ -177,6 +177,6 @@ def check_post_time_interval(user, model_cls):
         model_cls.query.filter_by(user_id=user.user_id), by='newest').first()
     if last_post is None:
         return
-    timedelta = get_now() - get_datetime(last_post.created_at)
-    if timedelta.seconds < current_app.config['MIN_POST_TIME_INTERVAL']:
+    diff_secs = (get_now() - get_datetime(last_post.created_at)).total_seconds()
+    if int(diff_secs) < current_app.config['MIN_POST_TIME_INTERVAL']:
         raise TooManyRequests('not outside minimum time interval for posting')
