@@ -93,3 +93,7 @@ data/fake-data.json
 
 .env
 db.sqlite3
+
+# config files
+setup/*.yml
+!setup/setup_template.yml

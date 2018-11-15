@@ -33,6 +33,7 @@ class BaseAppConfig:
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    THREADED = True
 
 def get_app_config_class(**override_environ):
     conf = os.environ.copy()
@@ -51,14 +52,11 @@ def get_app_config_class(**override_environ):
     return AppConfig
 
 def get_app_test_config_class(**override_environ):
-    conf = os.environ.copy()
-    conf.update(**override_environ)
     class AppTestConfig(BaseAppConfig):
         environ = 'test'
         DEBUG = True
         TESTING = True
         SECRET_KEY = 'secret'
         JWT_SECRET_KEY = 'jwtsecret'
-        SQLALCHEMY_DATABASE_URI = os.environ.get(
-            'NEWVALLEY_TEST_DB_PATH', 'sqlite://')
+        SQLALCHEMY_DATABASE_URI = 'sqlite://'
     return AppTestConfig

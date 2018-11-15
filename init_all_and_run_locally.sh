@@ -2,7 +2,10 @@
 
 set -ex
 
-#env
+#configuration
+cp setup/setup_template.yml setup/setup_dev.yml
+
+#proper environment
 $(./mk_env_file.py)
 $(./ch_dev_env.sh)
 

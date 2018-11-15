@@ -1,2 +1,2 @@
 #!/bin/bash
-./mk_env_file.py --env development --no_secrets
+./mk_env_file.py --no_secrets ./setup/setup_dev.yml
