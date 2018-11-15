@@ -4,16 +4,16 @@ import datetime as dt
 app_name = 'newvalley'
 
 
-env = os.environ.get('NEWVALLEY_ENV', 'development')
-assert env in {'development', 'production'}
+_env = os.environ.get('NEWVALLEY_ENV', 'development')
+assert _env in {'development', 'production'}
 
 
 def _is_dev():
-    return env == 'development'
+    return _env == 'development'
 
 
 def _is_prod():
-    return env == 'production'
+    return _env == 'production'
 
 
 def _get_var(key, default=None, conf=os.environ):
@@ -26,6 +26,7 @@ debug = _is_dev()
 
 
 class BaseAppConfig:
+    ENV = _env
     PROPAGATE_EXCEPTIONS = True
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
@@ -38,7 +39,7 @@ def get_app_config_class(**override_environ):
     conf = os.environ.copy()
     conf.update(**override_environ)
     class AppConfig(BaseAppConfig):
-        environ = env
+        ENV = _env
         DEBUG = _is_dev()
         TESTING = False
         SECRET_KEY = _get_var(
@@ -53,7 +54,7 @@ def get_app_config_class(**override_environ):
 
 def get_app_test_config_class(**override_environ):
     class AppTestConfig(BaseAppConfig):
-        environ = 'test'
+        ENV = 'test'
         DEBUG = True
         TESTING = True
         SECRET_KEY = 'secret'

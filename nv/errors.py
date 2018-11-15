@@ -2,7 +2,8 @@ from marshmallow import ValidationError
 from werkzeug.exceptions import HTTPException
 from flask_jwt_extended.exceptions import JWTExtendedException
 from nv.util import mk_errors
-from nv import config
+from nv import metaconfig
+from flask import current_app
 
 def jwt_error_handler(error):
     code = 401
@@ -35,7 +36,7 @@ def validation_error_handler(error):
 
 def generic_error_handler(error):
     code = getattr(error, 'status_code', 500)
-    if config.debug:
+    if current_app.config['DEBUG']:
         messages = [str(error)]
     else:
         messages = ['something went wrong!']

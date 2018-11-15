@@ -4,14 +4,14 @@ from flask import Flask
 from flask_cors import CORS
 
 from nv.extensions import db, api, jwt
-from nv import config
+from nv import metaconfig
 from nv.errors import register_handlers
 
 def get_app(conf_obj=None):
     if conf_obj is None:
-        conf_obj = config.get_app_config_class()
+        conf_obj = metaconfig.get_app_config_class()
 
-    app = Flask(config.app_name)
+    app = Flask(metaconfig.app_name)
     #configuration
     app.config.from_object(conf_obj)
     #extensions

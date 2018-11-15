@@ -1,7 +1,7 @@
 import pytest
 from flask_jwt_extended import create_access_token, create_refresh_token
 from nv.app import get_app
-from nv import config
+from nv import metaconfig
 from nv.util import generate_hash
 from nv.database import db
 from nv.models import (
@@ -16,7 +16,7 @@ from nv.models import (
 @pytest.fixture()
 def app():
     #setup
-    app = get_app(config.get_app_test_config_class())
+    app = get_app(metaconfig.get_app_test_config_class())
     with app.app_context():
         db.create_all()
         #dummy avatars

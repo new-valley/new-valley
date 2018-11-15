@@ -35,7 +35,6 @@ from nv.permissions import (
     EditUser,
 )
 from nv.database import db
-from nv import config
 
 
 class UsersRes(Resource):

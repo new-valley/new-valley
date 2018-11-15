@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from nv import app, config
+from nv import app
 from nv.models import Avatar, User, Subforum, Post, Topic
 from nv.serializers import (
     AvatarSchema,
@@ -12,14 +12,16 @@ from nv.serializers import (
 )
 from nv.database import db
 import os
-
 import json
 import random
 
+
 FAKE_DATA_PATH = os.path.join('data', 'fake-data.json')
+
 
 def get_app(**conf):
     return app.get_app(**conf)
+
 
 def populate(schema, data):
     with get_app().app_context():
@@ -27,8 +29,10 @@ def populate(schema, data):
         db.session.add_all(objs)
         db.session.commit()
 
+
 def populate_avatars(data):
     populate(AvatarSchema(many=True), data['avatars'])
+
 
 def populate_users(data):
     with get_app().app_context():
@@ -39,8 +43,10 @@ def populate_users(data):
         user['avatar_id'] = random.choice(avatars).avatar_id
     populate(UserSchema(many=True), users)
 
+
 def populate_subforums(data):
     populate(SubforumSchema(many=True), data['subforums'])
+
 
 def populate_topics(data):
     with get_app().app_context():
@@ -54,6 +60,7 @@ def populate_topics(data):
         topic['user_id'] = random.choice(users).user_id
     populate(TopicSchema(many=True), topics)
 
+
 def populate_posts(data):
     with get_app().app_context():
         topics = Topic.query.all()
@@ -65,6 +72,7 @@ def populate_posts(data):
         post['user_id'] = random.choice(users).user_id
         post['topic_id'] = random.choice(topics).topic_id
     populate(PostSchema(many=True), posts)
+
 
 def populate_db(data):
     print('populating avatars...', flush=True, end=' ')
@@ -84,10 +92,12 @@ def populate_db(data):
     print('done')
     return
 
+
 def main():
     with open(FAKE_DATA_PATH) as f:
         data = json.load(f)
     populate_db(data)
+
 
 if __name__ == '__main__':
     main()

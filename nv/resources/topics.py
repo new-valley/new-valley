@@ -35,7 +35,6 @@ from nv.permissions import (
     CreatePostInTopic,
 )
 from nv.database import db
-from nv import config
 from nv.resources.common import (
     parse_get_coll_args,
     generic_get_coll,

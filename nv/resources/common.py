@@ -19,7 +19,6 @@ from nv.util import (
     fmt_validation_error_messages,
 )
 from nv.database import db
-from nv import config
 
 
 def crop_query(query, offset=None, max_n_results=None):

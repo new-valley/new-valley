@@ -4,7 +4,6 @@ import argparse
 import getpass
 
 from nv.app import get_app
-from nv import config
 from nv.database import db
 from nv.models import (
     User,
@@ -109,7 +108,7 @@ def main():
     #app setup
     app = get_app()
 
-    print('setting up for env "{}"'.format(config.env))
+    print('setting up for env "{}"'.format(app.config['ENV']))
     #database setup
     if args.reset_db:
         print('resetting database...', end=' ', flush=True)
