@@ -38,8 +38,8 @@ class Avatar(Base):
     avatar_id = Column(BigInteger, primary_key=True, default=get_rand_id)
     uri = Column(String(256), nullable=False)
     category = Column(String(128), nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=False), server_default=func.now())
+    updated_at = Column(DateTime(timezone=False), onupdate=func.now())
     users = relationship('User', backref='avatar', lazy=True)
 
 
@@ -69,8 +69,8 @@ class User(Base):
     avatar_id = Column(
         BigInteger, ForeignKey('avatars.avatar_id'), nullable=True)
     signature = Column(String(1024), nullable=False, default='')
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=False), server_default=func.now())
+    updated_at = Column(DateTime(timezone=False), onupdate=func.now())
     posts = relationship('Post', backref='user', lazy=True, cascade='delete')
     topics = relationship('Topic', backref='user', lazy=True, cascade='delete')
 
@@ -81,8 +81,8 @@ class Subforum(Base):
     title = Column(String(64), unique=True, nullable=False)
     description = Column(String(128), nullable=False)
     position = Column(Integer, unique=True, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=False), server_default=func.now())
+    updated_at = Column(DateTime(timezone=False), onupdate=func.now())
     topics = relationship(
         'Topic', backref='subforum', lazy=True, cascade='delete')
 
@@ -103,8 +103,8 @@ class Topic(Base):
         BigInteger, ForeignKey('users.user_id'), nullable=False)
     subforum_id = Column(
         BigInteger, ForeignKey('subforums.subforum_id'), nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=False), server_default=func.now())
+    updated_at = Column(DateTime(timezone=False), onupdate=func.now())
     posts = relationship('Post', backref='topic', lazy=True, cascade='delete')
 
     #implicitly checked in endpoints
@@ -137,8 +137,8 @@ class Post(Base):
         BigInteger, ForeignKey('topics.topic_id'), nullable=False)
     content = Column(Text, nullable=False, default='')
     status = Column(String(64), nullable=False, default='published')
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=False), server_default=func.now())
+    updated_at = Column(DateTime(timezone=False), onupdate=func.now())
 
     #implicitly checked in endpoints
     '''@validates('user_id')

@@ -2,8 +2,10 @@ from flask import (
     make_response,
     jsonify,
 )
-
 from passlib.hash import pbkdf2_sha256 as sha256
+import datetime as dt
+import arrow
+
 
 def envelope(fn, key='data'):
     def wrapper(*args, **kwargs):
@@ -12,17 +14,21 @@ def envelope(fn, key='data'):
         return ret
     return wrapper
 
+
 def generate_hash(password):
     return sha256.hash(password)
 
+
 def verify_hash(password, hsh):
     return sha256.verify(password, hsh)
+
 
 def _filter_fields(objs, fields):
     fields = set(fields)
     if not isinstance(objs, list):
         return {k: v for k, v in objs.items() if k in fields}
     return [{k: v for k, v in obj.items() if k in fields} for obj in objs]
+
 
 def filter_fields(objs, fields=None, enveloped=False):
     if fields is None:
@@ -33,13 +39,16 @@ def filter_fields(objs, fields=None, enveloped=False):
         return {key: _filter_fields(objs[key], fields)}
     return _filter_fields(objs, fields)
 
+
 def flatten(lsts):
     return [item for sublst in lsts for item in sublst]
+
 
 def to_list(elem):
     if not isinstance(elem, list):
         elem = [elem]
     return elem
+
 
 def mk_message(message_or_error, code=None):
     message = {}
@@ -56,8 +65,10 @@ def mk_message(message_or_error, code=None):
         message['code'] = int(code)
     return message
 
+
 def mk_error(*args, **kwargs):
     return mk_message(*args, **kwargs)
+
 
 def mk_errors(code, messages_or_errors, as_response=True):
     messages_or_errors = to_list(messages_or_errors)
@@ -67,9 +78,28 @@ def mk_errors(code, messages_or_errors, as_response=True):
     else:
         return {'errors': errors}, code
 
+
 def fmt_validation_error_messages(messages):
     if isinstance(messages, dict):
         return flatten(
             [["{}: {}".format(k, v) for v in to_list(vs)]\
                 for k, vs in messages.items()])
     return [str(m) for m in to_list(messages)]
+
+
+def get_local_tz():
+    return dt.datetime.now(dt.timezone.utc).astimezone().tzinfo
+
+
+def get_utc_tz():
+    return dt.timezone.utc
+
+
+def get_datetime(datetime):
+    '''
+    datetime may be either datetime object or ISO-formatted datetime string.
+    if it doesn't contain tzinfo, assumes it's UTC.
+    '''
+    datetime = arrow.get(datetime).datetime
+    datetime = datetime.astimezone(get_utc_tz())
+    return datetime

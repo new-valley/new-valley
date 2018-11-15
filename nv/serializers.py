@@ -19,6 +19,7 @@ from marshmallow.fields import (
     List,
     String,
     Email,
+    DateTime,
 )
 from nv.database import db
 from nv.models import (
@@ -28,15 +29,30 @@ from nv.models import (
     Topic,
     Post,
 )
-from nv.util import generate_hash
+from nv.util import generate_hash, get_datetime
+
+
+class LocalizedDateTime(DateTime):
+    def __init__(self, **kwargs):
+        super().__init__(format='iso', **kwargs)
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return super()._serialize(value, attr, obj, **kwargs)
+        return get_datetime(value).isoformat()
+
+    def _deserialize(self, value, attr, obj, **kwargs):
+        if not value:
+            return super()._deserialize(value, attr, obj, **kwargs)
+        return get_datetime(value)
 
 
 class AvatarSchema(ModelSchema):
     avatar_id = field_for(Avatar, 'avatar_id', dump_only=True)
     uri = field_for(Avatar, 'uri', required=True)
     category = field_for(Avatar, 'category', required=True)
-    created_at = field_for(Avatar, 'created_at', dump_only=True)
-    updated_at = field_for(Avatar, 'updated_at', dump_only=True)
+    created_at = LocalizedDateTime(dump_only=True)
+    updated_at = LocalizedDateTime(dump_only=True)
 
     class Meta:
         unknown = EXCLUDE
@@ -61,8 +77,8 @@ class UserSchema(ModelSchema):
     avatar = Nested(
         AvatarSchema, many=False, exclude=['users'], dump_only=True)
     signature = field_for(User, 'signature', required=False)
-    created_at = field_for(User, 'created_at', dump_only=True)
-    updated_at = field_for(User, 'updated_at', dump_only=True)
+    created_at = LocalizedDateTime(dump_only=True)
+    updated_at = LocalizedDateTime(dump_only=True)
 
     @validates('password')
     def check_password_len(self, password):
@@ -122,8 +138,8 @@ class SubforumSchema(ModelSchema):
     description = field_for(Subforum, 'description', required=True)
     position = field_for(
         Subforum, 'position', required=not True, validate=Range(min=1))
-    created_at = field_for(Subforum, 'created_at', dump_only=True)
-    updated_at = field_for(Subforum, 'updated_at', dump_only=True)
+    created_at = LocalizedDateTime(dump_only=True)
+    updated_at = LocalizedDateTime(dump_only=True)
 
     class Meta:
         unknown = EXCLUDE
@@ -143,8 +159,8 @@ class TopicSchema(ModelSchema):
         Topic, 'subforum_id', required=True, load_only=True)
     subforum = Nested(
         SubforumSchema, many=False, dump_only=True)
-    created_at = field_for(Topic, 'created_at', dump_only=True)
-    updated_at = field_for(Topic, 'updated_at', dump_only=True)
+    created_at = LocalizedDateTime(dump_only=True)
+    updated_at = LocalizedDateTime(dump_only=True)
 
     @validates('status')
     def check_status(self, status):
@@ -166,8 +182,8 @@ class PostSchema(ModelSchema):
     user = Nested(UserSchema, many=False, dump_only=True)
     topic_id = field_for(Post, 'topic_id', required=True, load_only=True)
     topic = Nested(TopicSchema, many=False, dump_only=True)
-    created_at = field_for(Topic, 'created_at', dump_only=True)
-    updated_at = field_for(Topic, 'updated_at', dump_only=True)
+    created_at = LocalizedDateTime(dump_only=True)
+    updated_at = LocalizedDateTime(dump_only=True)
 
     @validates('status')
     def check_status(self, status):
