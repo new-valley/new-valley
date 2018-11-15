@@ -21,6 +21,7 @@ from nv.util import (
 from nv.database import db
 from nv import config
 
+
 def crop_query(query, offset=None, max_n_results=None):
     if offset is not None:
         query = query.offset(offset)
@@ -32,13 +33,16 @@ def crop_query(query, offset=None, max_n_results=None):
         query = query.limit(max_n_results)
     return query, new_offset
 
+
 DEF_MAX_N_RESULTS = 2048
+
 
 ORDER_BY_OPTIONS = [
     'newest',
     'oldest',
     None,
 ]
+
 
 DEF_GET_COLL_ARGS = {
     'fields': DelimitedList(Str()),
@@ -48,10 +52,12 @@ DEF_GET_COLL_ARGS = {
         validate=validate.OneOf(ORDER_BY_OPTIONS), missing='newest'),
 }
 
+
 def parse_get_coll_args(req, args=DEF_GET_COLL_ARGS,
         locations=('querystring', 'form')):
     args = parser.parse(args, req, locations=locations)
     return args
+
 
 def order_query(query, by='newest', date_field='created_at'):
     assert by in ORDER_BY_OPTIONS
@@ -63,6 +69,7 @@ def order_query(query, by='newest', date_field='created_at'):
         raise ValueError('"by" must bt in {}'.format(ORDER_BY_OPTIONS))
     query = query.order_by(key)
     return query
+
 
 def generic_get_coll(
         full_query, schema,
@@ -150,15 +157,6 @@ def get_user(user_id=None, username=None, abort_if_not_found=True):
         query = User.query.filter_by(username=username)
         not_found_msg = 'user username={} doest not exist'.format(username)
     return get_obj(query, abort_if_not_found, not_found_msg)
-
-
-def is_admin(user):
-    return user.username in config.superusers\
-        or 'admin' in user.roles.split(',')
-
-
-def is_moderator(user):
-    return 'moderator' in user.roles.split(',')
 
 
 def check_permissions(user, permissions):

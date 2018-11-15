@@ -1,39 +1,38 @@
 import os
+import datetime as dt
 
 app_name = 'newvalley'
+
 
 env = os.environ.get('NEWVALLEY_ENV', 'development')
 assert env in {'development', 'production'}
 
+
 def _is_dev():
     return env == 'development'
 
+
 def _is_prod():
     return env == 'production'
+
 
 def _get_var(key, default=None, conf=os.environ):
     if not _is_dev() and not key in conf:
         raise ValueError('var {} should be in env for production'.format(key))
     return conf.get(key, default)
 
+
 debug = _is_dev()
 
-#ignore auth requirements
-#NEVER user it in prod or during tests
-ignore_jwt_texts = (not True) if _is_dev() else False
-ignore_jwt_images = (not True) if _is_dev() else False
-ignore_jwt_auth = (not True) if _is_dev() else False
-
-superusers = {
-    'su',
-}
 
 class BaseAppConfig:
     PROPAGATE_EXCEPTIONS = True
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    THREADED = True
+    JWT_EXPIRATION_DELTA = dt.timedelta(
+        hours=int(os.environ.get('NEWVALLEY_JWT_EXPIRATION_DELTA_HOURS', 24)))
+
 
 def get_app_config_class(**override_environ):
     conf = os.environ.copy()
@@ -50,6 +49,7 @@ def get_app_config_class(**override_environ):
             'NEWVALLEY_DB_PATH', 'sqlite:////tmp/newvalleydev.db', conf)
         SQLALCHEMY_TRACK_MODIFICATIONS = _is_prod()
     return AppConfig
+
 
 def get_app_test_config_class(**override_environ):
     class AppTestConfig(BaseAppConfig):
