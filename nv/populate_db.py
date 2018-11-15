@@ -142,7 +142,7 @@ def populate_db(src_path, n_threads, max_chunk_size):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'src_path',
+        '--src_path',
         nargs='?',
         help='path to fake data JSON file (default={})'.format(DEF_SRC_PATH),
         default=DEF_SRC_PATH,

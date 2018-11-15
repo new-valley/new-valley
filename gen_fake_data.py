@@ -264,7 +264,7 @@ def gen_fake_data(n_avatars, n_users, n_subforums, n_topics, n_posts, dst_path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'dst_path',
+        '--dst_path',
         nargs='?',
         help='path to save result JSON file (default={})'.format(DEF_DST_PATH),
         default=DEF_DST_PATH,
