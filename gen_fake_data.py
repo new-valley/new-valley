@@ -16,7 +16,8 @@ DEF_N_SUBFORUMS = 50
 DEF_N_TOPICS = 150
 DEF_N_POSTS = 500
 DEF_DST_PATH = os.path.join('data', 'fake-data.json')
-MIN_START_DATE = arrow.get(dt.datetime(1984, 1, 1)).datetime
+MIN_START_DATE = arrow.get(dt.datetime(1974, 1, 1)).datetime
+MAX_TIMEDELTA = dt.timedelta(days=365*13)
 
 
 IMGS_URIS = [
@@ -147,7 +148,7 @@ def get_rand_id():
 
 def get_rand_datetime(start=MIN_START_DATE):
     start = get_datetime(start)
-    max_delta = dt.datetime.now(dt.timezone.utc) - start
+    max_delta = min(dt.datetime.now(dt.timezone.utc) - start, MAX_TIMEDELTA)
     delta_secs = random.randint(0, int(max_delta.total_seconds()))
     datetime = start + dt.timedelta(seconds=delta_secs)
     return datetime
