@@ -16,7 +16,7 @@ DEF_N_SUBFORUMS = 50
 DEF_N_TOPICS = 150
 DEF_N_POSTS = 500
 DEF_DST_PATH = os.path.join('data', 'fake-data.json')
-MIN_START_DATE = arrow.get(dt.datetime(1994, 1, 1)).datetime
+MIN_START_DATE = arrow.get(dt.datetime(1984, 1, 1)).datetime
 
 
 IMGS_URIS = [
@@ -153,7 +153,7 @@ def get_rand_datetime(start=MIN_START_DATE):
     return datetime
 
 
-def get_datetimes_pair(start=None):
+def get_datetimes_pair(start=MIN_START_DATE):
     created = get_rand_datetime(start=start)
     updated = get_rand_datetime(created)
     return {
@@ -162,7 +162,7 @@ def get_datetimes_pair(start=None):
     }
 
 
-def add_datetimes(dct, start=None):
+def add_datetimes(dct, start=MIN_START_DATE):
     dct.update(get_datetimes_pair(start=start))
     return dct
 
