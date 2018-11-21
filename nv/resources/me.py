@@ -26,4 +26,6 @@ class MeRes(Resource):
             obj=user,
             schema=UserSchema(),
         )
+        #user themselves are allowed to see their emails
+        ret['data']['email'] = str(user.email)
         return ret

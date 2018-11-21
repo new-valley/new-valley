@@ -26,4 +26,5 @@ def test_client_gets_correct_user_fields_for_itself(client_with_tok):
         'status',
         'created_at',
         'updated_at',
+        'email',
     } == set(resp.json['data'].keys())
