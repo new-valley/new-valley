@@ -9,6 +9,7 @@ jwt = JWTManager()
 from nv.resources import (
     auth,
     users,
+    me,
     subforums,
     topics,
     posts,
@@ -18,6 +19,8 @@ api = Api(prefix='/api')
 #avatars
 api.add_resource(avatars.AvatarsRes, '/avatars')
 api.add_resource(avatars.AvatarRes, '/avatars/<int:avatar_id>')
+#alias for the logged in users themselves
+api.add_resource(me.MeRes, '/me')
 #users
 api.add_resource(users.UsersRes, '/users')
 api.add_resource(users.UserRes, '/users/<int:user_id>')
