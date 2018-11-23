@@ -20,6 +20,7 @@ from marshmallow.fields import (
     String,
     Email,
     DateTime,
+    Integer,
 )
 from nv.database import db
 from nv.models import (
@@ -161,6 +162,7 @@ class TopicSchema(ModelSchema):
         Topic, 'subforum_id', required=True, load_only=True)
     subforum = Nested(
         SubforumSchema, many=False, dump_only=True)
+    n_posts = Integer(dump_only=True)
     created_at = LocalizedDateTime(dump_only=True)
     updated_at = LocalizedDateTime(dump_only=True)
 
@@ -168,6 +170,13 @@ class TopicSchema(ModelSchema):
     def check_status(self, status):
         if not status in Topic.VALID_STATUSES:
             raise ValidationError('status \'{}\' is invalid'.format(status))
+
+    @post_dump
+    def set_n_posts(self, data):
+        if 'topic_id' in data:
+            n_posts = Post.query.filter_by(topic_id=data['topic_id']).count()
+            data['n_posts'] = n_posts
+        return data
 
     class Meta:
         unknown = EXCLUDE

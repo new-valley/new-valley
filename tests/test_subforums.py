@@ -181,6 +181,7 @@ def test_client_gets_correct_subforum_topics_fields(client, subforum_id):
         'status',
         'user',
         'subforum',
+        'n_posts',
         'created_at',
         'updated_at',
     } == set(resp.json['data'][0].keys())
@@ -235,6 +236,7 @@ def test_logged_in_client_gets_correct_fields_in_topic_creation(
         'status',
         'user',
         'subforum',
+        'n_posts',
         'created_at',
         'updated_at',
     } == set(resp.json['data'].keys())

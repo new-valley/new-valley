@@ -361,6 +361,7 @@ def test_client_gets_correct_user_topics_fields(client, user_id):
         'status',
         'user',
         'subforum',
+        'n_posts',
         'created_at',
         'updated_at',
     } == set(resp.json['data'][0].keys())
