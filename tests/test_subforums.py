@@ -207,23 +207,37 @@ def test_logged_in_client_can_create_topic_in_subforum(
     assert resp.status_code == 200
 
 
-def test_logged_in_client_gets_correct_n_topics(
-        client_with_tok, subforum_id):
+def test_logged_in_client_gets_correct_n_posts(
+        client_with_tok, topic_id):
     resp_1 = client_with_tok.get('/api/me')
     resp_2 = client_with_tok.post(
-        '/api/subforums/{}/topics'.format(subforum_id),
+        '/api/topics/{}/posts'.format(topic_id),
         data={
-            'title': 'olar',
+            'content': 'olar',
         }
     )
     resp_3 = client_with_tok.get('/api/me')
     resp_4 = client_with_tok.delete(
-        '/api/topics/{}'.format(resp_2.json['data']['topic_id']))
+        '/api/posts/{}'.format(resp_2.json['data']['post_id']))
     resp_5 = client_with_tok.get('/api/me')
     assert \
-        resp_3.json['data']['n_topics'] == resp_1.json['data']['n_topics'] + 1
+        resp_3.json['data']['n_posts'] == resp_1.json['data']['n_posts'] + 1
     assert \
-        resp_5.json['data']['n_topics'] == resp_3.json['data']['n_topics'] - 1
+        resp_5.json['data']['n_posts'] == resp_3.json['data']['n_posts'] - 1
+
+
+def test_logged_in_client_gets_correct_n_topics_in_subforum(
+        client_with_tok, subforum_id):
+    resp_1 = client_with_tok.get('/api/subforums/{}'.format(subforum_id))
+    resp_2 = client_with_tok.post('/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'olar',
+            'description': 'descr',
+        }
+    )
+    resp_3 = client_with_tok.get('/api/subforums/{}'.format(subforum_id))
+    assert \
+        resp_3.json['data']['n_topics'] == resp_1.json['data']['n_topics'] + 1
 
 
 def test_logged_in_client_gets_correct_fields_in_topic_creation(

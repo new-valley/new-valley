@@ -300,6 +300,7 @@ def test_logged_in_client_gets_correct_n_posts_in_topic(
     assert \
         resp_3.json['data']['n_posts'] == resp_1.json['data']['n_posts'] + 1
 
+
 def test_logged_in_client_under_antiflood_cannot_post_in_interval(
         client_with_tok_under_antifloood, antiflood_time, topic_id):
     time.sleep(antiflood_time)

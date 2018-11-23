@@ -149,7 +149,7 @@ class SubforumSchema(ModelSchema):
     def set_n_topics(self, data):
         if 'subforum_id' in data:
             n_topics = \
-                Topic.query.filter_by(topic_id=data['subforum_id']).count()
+                Topic.query.filter_by(subforum_id=data['subforum_id']).count()
             data['n_topics'] = n_topics
         return data
 
