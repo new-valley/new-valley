@@ -18,6 +18,8 @@ def test_client_gets_correct_users_fields(client):
         'roles',
         'avatar',
         'status',
+        'n_posts',
+        'n_topics',
         'created_at',
         'updated_at',
     } == set(resp.json['data'][0].keys())
@@ -157,6 +159,8 @@ def test_client_gets_correct_user_fields(client, user_id):
         'roles',
         'avatar',
         'status',
+        'n_posts',
+        'n_topics',
         'created_at',
         'updated_at',
     } == set(resp.json['data'].keys())
@@ -242,6 +246,8 @@ def test_logged_in_client_gets_correct_put_fields(
         'roles',
         'avatar',
         'status',
+        'n_posts',
+        'n_topics',
         'created_at',
         'updated_at',
     } == set(resp.json['data'].keys())

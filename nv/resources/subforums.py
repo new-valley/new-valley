@@ -145,4 +145,7 @@ class SubforumTopicsRes(Resource):
             schema=schema,
             data=data,
         )
+        #updating number of topics by user
+        user.n_topics += 1
+        user.save()
         return ret

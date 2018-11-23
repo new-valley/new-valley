@@ -78,6 +78,9 @@ class TopicRes(Resource):
         ret = generic_delete(
             obj=topic,
         )
+        #updating number of topics by user
+        user.n_topics = max(user.n_topics - 1, 0)
+        user.save()
         return ret
 
     @jwt_required
@@ -129,4 +132,7 @@ class TopicPostsRes(Resource):
             schema=schema,
             data=data,
         )
+        #updating number of posts by user
+        user.n_posts += 1
+        user.save()
         return ret

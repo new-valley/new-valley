@@ -179,6 +179,7 @@ def get_rand_avatar():
 
 def get_rand_user(avatar=None):
     avatar = get_rand_avatar() if avatar is None else avatar
+    n_topics = random.randint(1, 10000)
     dct = add_datetimes({
         'user_id': get_rand_id(),
         'avatar_id': avatar['avatar_id'],
@@ -187,6 +188,8 @@ def get_rand_user(avatar=None):
             sample(USER_ROLES, random.randint(1, len(USER_ROLES)))),
         'status': choice(USER_STATUSES),
         'signature': choice(SIGNATURES) + prob(0.75)*salt(),
+        'n_topics': n_topics,
+        'n_posts': random.randint(n_topics, 300000),
         'email': get_rand_email(),
         'password': get_rand_str(),
     }, start=avatar['created_at'])

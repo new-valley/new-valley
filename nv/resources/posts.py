@@ -74,6 +74,9 @@ class PostRes(Resource):
         ret = generic_delete(
             obj=post,
         )
+        #updating number of posts by user
+        user.n_posts = max(user.n_posts - 1, 0)
+        user.save()
         return ret
 
     @jwt_required

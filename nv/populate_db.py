@@ -75,7 +75,7 @@ def add_all(objs):
 def deserialize(data, model_cls=None):
     new_dct = {}
     for k, v in data.items():
-        if k.endswith('_id'):
+        if k.endswith('_id') or k.startswith('n_'):
             new_dct[k] = int(v)
         elif k.endswith('_at'):
             new_dct[k] = get_datetime(v)

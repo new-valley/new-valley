@@ -236,6 +236,25 @@ def test_logged_in_client_can_create_post_in_topic(client_with_tok, topic_id):
     assert resp.status_code == 200
 
 
+def test_logged_in_client_gets_correct_n_posts(
+        client_with_tok, topic_id):
+    resp_1 = client_with_tok.get('/api/me')
+    resp_2 = client_with_tok.post(
+        '/api/topics/{}/posts'.format(topic_id),
+        data={
+            'content': 'olar',
+        }
+    )
+    resp_3 = client_with_tok.get('/api/me')
+    resp_4 = client_with_tok.delete(
+        '/api/posts/{}'.format(resp_2.json['data']['post_id']))
+    resp_5 = client_with_tok.get('/api/me')
+    assert \
+        resp_3.json['data']['n_posts'] == resp_1.json['data']['n_posts'] + 1
+    assert \
+        resp_5.json['data']['n_posts'] == resp_3.json['data']['n_posts'] - 1
+
+
 def test_logged_in_client_gets_correct_fields_in_post_creation(
         client_with_tok, topic_id):
     resp = client_with_tok.post('/api/topics/{}/posts'.format(topic_id),

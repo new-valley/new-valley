@@ -77,6 +77,8 @@ class UserSchema(ModelSchema):
     avatar = Nested(
         AvatarSchema, many=False, exclude=['users'], dump_only=True)
     signature = field_for(User, 'signature', required=False)
+    n_posts = field_for(User, 'n_posts')
+    n_topics = field_for(User, 'n_topics')
     created_at = LocalizedDateTime(dump_only=True)
     updated_at = LocalizedDateTime(dump_only=True)
 
