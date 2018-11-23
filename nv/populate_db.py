@@ -35,6 +35,8 @@ DEF_N_THREADS = mp.cpu_count()
 
 
 def partition(lst, chunk_size):
+    if chunk_size < 1:
+        return lst
     lsts = [lst[i:i+chunk_size] for i in range(0, len(lst), chunk_size)]
     #lsts = [l for l in lsts if l]
     return lsts
