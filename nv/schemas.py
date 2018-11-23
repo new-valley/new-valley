@@ -141,8 +141,17 @@ class SubforumSchema(ModelSchema):
     description = field_for(Subforum, 'description', required=True)
     position = field_for(
         Subforum, 'position', required=not True, validate=Range(min=1))
+    n_topics = Integer(dump_only=True)
     created_at = LocalizedDateTime(dump_only=True)
     updated_at = LocalizedDateTime(dump_only=True)
+
+    @post_dump
+    def set_n_topics(self, data):
+        if 'subforum_id' in data:
+            n_topics = \
+                Topic.query.filter_by(topic_id=data['subforum_id']).count()
+            data['n_topics'] = n_topics
+        return data
 
     class Meta:
         unknown = EXCLUDE

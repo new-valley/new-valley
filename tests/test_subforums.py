@@ -20,6 +20,7 @@ def test_client_gets_correct_subforums_fields(client):
         'updated_at',
         'title',
         'description',
+        'n_topics',
         'position',
     } == set(resp.json['data'][0].keys())
 
@@ -37,7 +38,7 @@ def test_client_offsets_subforums(client):
     resp_2 = client.get('/api/subforums?offset=2')
     assert len(resp_1.json['data']) \
         == len(resp_2.json['data']) + min(2, len(resp_1.json['data']))
-    
+
 
 def test_client_limits_subforums(client):
     resp_1 = client.get('/api/subforums?max_n_results=1')
@@ -61,6 +62,7 @@ def test_client_gets_correct_subforum_fields(client, subforum_id):
         'updated_at',
         'title',
         'description',
+        'n_topics',
         'position',
     } == set(resp.json['data'].keys())
 
@@ -143,6 +145,7 @@ def test_logged_in_admin_gets_correct_put_fields(admin_with_tok, subforum_id):
         'updated_at',
         'title',
         'description',
+        'n_topics',
         'position',
     } == set(resp.json['data'].keys())
 
