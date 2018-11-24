@@ -11,4 +11,4 @@ port: 7310
 n_workers: 1
 #jwt token expiration times (in seconds)
 jwt_access_expiration_time: 86400
-jwt_refresh_expiration_time: 86400
+jwt_refresh_expiration_time: 160000
