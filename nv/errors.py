@@ -1,13 +1,17 @@
 from marshmallow import ValidationError
 from werkzeug.exceptions import HTTPException
 from flask_jwt_extended.exceptions import JWTExtendedException
+import jwt
 from nv.util import mk_errors
 from nv import metaconfig
 from flask import current_app
 
 def jwt_error_handler(error):
     code = 401
-    messages = list(getattr(error, 'args', []))
+    if isinstance(error, jwt.exceptions.ExpiredSignatureError):
+        messages = ['expired_token']
+    else:
+        messages = list(getattr(error, 'args', []))
     return mk_errors(code, messages)
 
 def permission_error_handler(error):
@@ -44,7 +48,7 @@ def generic_error_handler(error):
 
 def error_handler(error):
     try:
-        if isinstance(error, JWTExtendedException):
+        if isinstance(error, (JWTExtendedException, jwt.exceptions.PyJWTError)):
             return jwt_error_handler(error)
         elif isinstance(error, HTTPException):
             return http_error_handler(error)
