@@ -28,8 +28,13 @@ class BaseAppConfig:
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_EXPIRATION_DELTA = dt.timedelta(
-        hours=int(os.environ.get('NEWVALLEY_JWT_EXPIRATION_DELTA_HOURS', 24)))
+    #jwt expiration time, in seconds
+    JWT_ACCESS_TOKEN_EXPIRES = dt.timedelta(
+        seconds=int(os.environ.get(
+            'NEWVALLEY_JWT_ACCESS_EXPIRATION_TIME', 24*60*60)))
+    JWT_REFRESH_TOKEN_EXPIRES = dt.timedelta(
+        seconds=int(os.environ.get(
+            'NEWVALLEY_JWT_REFRESH_EXPIRATION_TIME', 24*60*60)))
     #minimum posting time interval in seconds for posts and topics creation
     MIN_POST_TIME_INTERVAL = int(
         os.environ.get('NEWVALLEY_MIN_POST_TIME_INTERVAL', 30))
