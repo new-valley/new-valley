@@ -48,7 +48,7 @@ class UsersRes(Resource):
         return ret
 
     def post(self):
-        data = {k: v[0] for k, v in dict(request.form).items()}
+        data = request.form.to_dict()
         #default avatar to be chosen
         if not 'avatar_id' in data:
             data['avatar_id'] = Avatar.query.first().avatar_id

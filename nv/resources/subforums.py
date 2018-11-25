@@ -64,7 +64,7 @@ class SubforumsRes(Resource):
         check_permissions(user, [
             CreateSubforum(),
         ])
-        data = {k: v[0] for k, v in dict(request.form).items()}
+        data = request.form.to_dict()
         if not 'position' in data:
             subforum = Subforum.query.order_by(-Subforum.position).first()
             position = 1 if subforum is None else (subforum.position + 1)
@@ -134,7 +134,7 @@ class SubforumTopicsRes(Resource):
         ])
         check_post_time_interval(user, Topic)
         #validating/updating data
-        data = {k: v[0] for k, v in dict(request.form).items()}
+        data = request.form.to_dict()
         data['user_id'] = user.user_id
         data['subforum_id'] = subforum.subforum_id
         schema = TopicSchema()

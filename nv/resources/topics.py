@@ -121,7 +121,7 @@ class TopicPostsRes(Resource):
         ])
         check_post_time_interval(user, Post)
         #validating/updating data
-        data = {k: v[0] for k, v in dict(request.form).items()}
+        data = request.form.to_dict()
         data['user_id'] = user.user_id
         data['topic_id'] = topic.topic_id
         schema = PostSchema()
