@@ -28,13 +28,18 @@ class Login(Resource):
         Login into system.
         '''
         args = request.form
-        if not 'username' in args or not 'password' in args:
-            return mk_errors(400, 'username and password are required')
-        user = User.query.filter_by(username=args['username']).first()
+        if not 'password' in args:
+            return mk_errors(400, 'email is required')
+        if 'username' in args:
+            user = User.query.filter_by(username=args['username']).first()
+        elif 'email' in args:
+            user = User.query.filter_by(email=args['email']).first()
+        else:
+            return mk_errors(400, 'email or username are required')
         if user is None or not verify_hash(args['password'], user.password):
-            return mk_errors(400, 'invalid username or password')
-        access_tok = create_access_token(identity=args['username'])
-        refresh_tok = create_refresh_token(identity=args['username'])
+            return mk_errors(400, 'invalid credentials')
+        access_tok = create_access_token(identity=user.username)
+        refresh_tok = create_refresh_token(identity=user.username)
         return {
             'access_token': access_tok,
             'refresh_token': refresh_tok,

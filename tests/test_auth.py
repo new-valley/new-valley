@@ -1,13 +1,31 @@
-def test_unregistered_user_cannot_login(client):
+def test_unregistered_user_cannot_login_with_username(client):
     resp = client.post('/api/auth/login',
         data={'username': 'unregistered', 'password': 'testpass'})
     assert resp.status_code == 400
 
 
-def test_registered_user_can_login(client):
+def test_unregistered_user_cannot_login_with_email(client):
+    resp = client.post('/api/auth/login',
+        data={'username': 'wrong@wrongmail.com', 'password': 'testpass'})
+    assert resp.status_code == 400
+
+
+def test_registered_user_can_login_with_username(client):
     resp = client.post('/api/auth/login',
         data={
             'username': 'user',
+            'password': 'testpass'
+        }
+    )
+    assert resp.status_code == 200
+    assert 'access_token' in resp.json
+    assert 'refresh_token' in resp.json
+
+
+def test_registered_user_can_login_with_email(client):
+    resp = client.post('/api/auth/login',
+        data={
+            'email': 'user@users.com',
             'password': 'testpass'
         }
     )
