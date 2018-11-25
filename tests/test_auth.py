@@ -34,6 +34,37 @@ def test_registered_user_can_login_with_email(client):
     assert 'refresh_token' in resp.json
 
 
+def test_registered_user_cannot_login_with_wrong_password(client):
+    resp = client.post('/api/auth/login',
+        data={
+            'username': 'user',
+            'password': 'wrongtestpass'
+        }
+    )
+    assert resp.status_code == 400
+
+
+def test_registered_user_cannot_login_with_missing_fields(client):
+    resp_1 = client.post('/api/auth/login',
+        data={
+            'password': 'wrongtestpass'
+        }
+    )
+    resp_2 = client.post('/api/auth/login',
+        data={
+            'email': 'user@users.com'
+        }
+    )
+    resp_3 = client.post('/api/auth/login',
+        data={
+            'username': 'user',
+        }
+    )
+    assert resp_1.status_code == 400
+    assert resp_2.status_code == 400
+    assert resp_3.status_code == 400
+
+
 def test_logged_in_user_can_logoff(client_with_tok):
     resp = client_with_tok.post('/api/auth/logout')
     assert resp.status_code == 204
