@@ -11,5 +11,5 @@ export FLASK_ENV=$app_env
 if [[ "$app_env" == 'development' ]]; then
     flask run --host=$host --with-threads --port=$port $@
 else
-    gunicorn -w $n_workers 'nv.app:get_app()'
+    gunicorn -w $n_workers -b "$host:$port" 'nv.app:get_app()' $@
 fi
