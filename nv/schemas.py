@@ -172,7 +172,7 @@ class TopicSchema(ModelSchema):
         Topic, 'subforum_id', required=True, load_only=True)
     subforum = Nested(
         SubforumSchema, many=False, dump_only=True)
-    n_posts = Integer(dump_only=True)
+    n_posts = Integer(dump_only=True, missing=0)
     last_post = Nested('PostSchema', many=False, dump_only=True, missing=None)
     created_at = LocalizedDateTime(dump_only=True)
     updated_at = LocalizedDateTime(dump_only=True)
