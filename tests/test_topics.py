@@ -347,3 +347,27 @@ def test_logged_in_client_under_antiflood_cannot_post_in_interval(
     assert end_time - start_time < antiflood_time
     assert resp_1.status_code == 200
     assert resp_2.status_code == 429
+
+
+def test_client_corretly_gets_topics_by_newest_last_post(
+    client_with_tok, topic_id_getter):
+    topic_id_1 = topic_id_getter('user')
+    topic_id_2 = topic_id_getter('user_b')
+    #test sensitive to datetime precision of objects
+    time.sleep(1)
+    resp_1 = client_with_tok.post('/api/topics/{}/posts'.format(topic_id_1),
+        data={
+            'content': 'olar',
+        }
+    )
+    resp_2 = client_with_tok.get('/api/topics?order=newest_last_post')
+    time.sleep(1)
+    resp_3 = client_with_tok.post('/api/topics/{}/posts'.format(topic_id_2),
+        data={
+            'content': 'olar2',
+        }
+    )
+    resp_4 = client_with_tok.get('/api/topics?order=newest_last_post')
+    assert resp_2.json['data'][0]['topic_id'] == str(topic_id_1)
+    assert resp_4.json['data'][0]['topic_id'] == str(topic_id_2)
+    assert resp_4.json['data'][1]['topic_id'] == str(topic_id_1)

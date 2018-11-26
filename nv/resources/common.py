@@ -12,6 +12,11 @@ from sqlalchemy import exc, desc
 from webargs import validate
 from nv.models import (
     User,
+    Topic,
+    Post,
+)
+from nv.schemas import (
+    TopicSchema,
 )
 from flask import abort
 from flask import current_app
@@ -48,6 +53,9 @@ ORDER_BY_OPTIONS = [
 ]
 
 
+ORDER_TOPICS_OPTIONS = ORDER_BY_OPTIONS + ['newest_last_post']
+
+
 DEF_GET_COLL_ARGS = {
     'fields': DelimitedList(Str()),
     'offset': Int(validate=lambda n: n >= 0),
@@ -57,10 +65,21 @@ DEF_GET_COLL_ARGS = {
 }
 
 
+GET_TOPICS_ARGS = DEF_GET_COLL_ARGS.copy()
+GET_TOPICS_ARGS.update({
+    'order': Str(validate=validate.OneOf(ORDER_TOPICS_OPTIONS),
+        missing='newest_last_post'),
+})
+
+
 def parse_get_coll_args(req, args=DEF_GET_COLL_ARGS,
         locations=('querystring', 'form')):
     args = parser.parse(args, req, locations=locations)
     return args
+
+
+def parse_get_topics_args(req):
+    return parse_get_coll_args(req, args=GET_TOPICS_ARGS)
 
 
 def order_query(query, by='newest', date_field='created_at'):
@@ -69,10 +88,20 @@ def order_query(query, by='newest', date_field='created_at'):
         key = desc('{}'.format(date_field))
     elif by == 'oldest':
         key = '{}'.format(date_field)
+    elif by is None:
+        return query
     else:
-        raise ValueError('"by" must bt in {}'.format(ORDER_BY_OPTIONS))
+        raise ValueError('"by" must be in {}'.format(ORDER_BY_OPTIONS))
     query = query.order_by(key)
     return query
+
+
+def order_topics(query, by='newest_last_post'):
+    if by == 'newest_last_post':
+        query = query.outerjoin(Topic.posts).order_by(desc(Post.created_at))
+        query = query.distinct(Topic.topic_id)
+        by = None
+    return order_query(query, by=by)
 
 
 def generic_get_coll(
@@ -89,6 +118,12 @@ def generic_get_coll(
         'offset': new_offset,
         'data': data,
     }
+
+
+def get_topics(full_query, order='newest_last_post', **kwargs):
+    query = order_topics(full_query, by=order)
+    return generic_get_coll(
+        query, schema=TopicSchema(many=True), order=None, **kwargs)
 
 
 def generic_get(obj, schema):

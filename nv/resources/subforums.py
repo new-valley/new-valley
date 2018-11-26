@@ -37,6 +37,8 @@ from nv.database import db
 from nv.resources.common import (
     parse_get_coll_args,
     generic_get_coll,
+    parse_get_topics_args,
+    get_topics,
     generic_get,
     generic_post,
     generic_put,
@@ -116,10 +118,9 @@ class SubforumTopicsRes(Resource):
         subforum = Subforum.query.get(subforum_id)
         if subforum is None:
             return mk_errors(404, 'subforum does not exist')
-        args = parse_get_coll_args(request)
-        ret = generic_get_coll(
+        args = parse_get_topics_args(request)
+        ret = get_topics(
             full_query=Topic.query.filter_by(subforum_id=subforum_id),
-            schema=TopicSchema(many=True),
             **args
         )
         return ret

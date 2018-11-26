@@ -38,6 +38,8 @@ from nv.database import db
 from nv.resources.common import (
     parse_get_coll_args,
     generic_get_coll,
+    parse_get_topics_args,
+    get_topics,
     generic_get,
     generic_post,
     generic_put,
@@ -51,13 +53,12 @@ from nv.resources.common import (
 
 class TopicsRes(Resource):
     def get(self):
-        args = parse_get_coll_args(request)
-        objs = generic_get_coll(
+        args = parse_get_topics_args(request)
+        ret = get_topics(
             full_query=Topic.query,
-            schema=TopicSchema(many=True),
             **args,
         )
-        return objs
+        return ret
 
 
 class TopicRes(Resource):
