@@ -46,7 +46,7 @@ def reset_db(app):
 def create_avatar(app):
     with app.app_context():
         Avatar.create_and_save(
-            uri='http://example.com/img.jpg',
+            uri='http://i.imgur.com/NiFpHqz.png',
             category='games',
         )
 
