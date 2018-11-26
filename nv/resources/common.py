@@ -69,6 +69,7 @@ GET_TOPICS_ARGS = DEF_GET_COLL_ARGS.copy()
 GET_TOPICS_ARGS.update({
     'order': Str(validate=validate.OneOf(ORDER_TOPICS_OPTIONS),
         missing='newest_last_post'),
+    'statuses': DelimitedList(Str()),
 })
 
 
@@ -105,6 +106,12 @@ def order_topics(query, by='newest_last_post'):
     return order_query(query, by=by)
 
 
+def filter_topics_by_statuses(query, statuses=None):
+    if statuses is not None:
+        query = query.filter(Topic.status.in_(statuses))
+    return query
+
+
 def generic_get_coll(
         full_query, schema,
         offset=None, max_n_results=None, fields=None, order='newest'):
@@ -121,8 +128,9 @@ def generic_get_coll(
     }
 
 
-def get_topics(full_query, order='newest_last_post', **kwargs):
-    query = order_topics(full_query, by=order)
+def get_topics(full_query, order='newest_last_post', statuses=None, **kwargs):
+    query = filter_topics_by_statuses(full_query, statuses)
+    query = order_topics(query, by=order)
     return generic_get_coll(
         query, schema=TopicSchema(many=True), order=None, **kwargs)
 

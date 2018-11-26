@@ -37,7 +37,7 @@ def test_client_offsets_posts(client):
     resp_2 = client.get('/api/posts?offset=2')
     assert len(resp_1.json['data']) \
         == len(resp_2.json['data']) + min(2, len(resp_1.json['data']))
-    
+
 
 def test_client_limits_posts(client):
     resp_1 = client.get('/api/posts?max_n_results=1')

@@ -41,13 +41,32 @@ def test_client_offsets_topics(client):
     resp_2 = client.get('/api/topics?offset=2')
     assert len(resp_1.json['data']) \
         == len(resp_2.json['data']) + min(2, len(resp_1.json['data']))
-    
+
 
 def test_client_limits_topics(client):
     resp_1 = client.get('/api/topics?max_n_results=1')
     resp_2 = client.get('/api/topics?max_n_results=2')
     assert len(resp_1.json['data']) <= 1
     assert len(resp_2.json['data']) <= 2
+
+
+def test_client_filter_topics_by_statuses(admin_with_tok, client):
+    admin_with_tok.post('/api/topics',
+        data={
+            'title': 'hey',
+            'status': 'published',
+        }
+    )
+    admin_with_tok.post('/api/topics',
+        data={
+            'title': 'hey2',
+            'status': 'pinned',
+        }
+    )
+    resp_1 = client.get('/api/topics?statuses=published,pinned')
+    resp_2 = client.get('/api/topics?statuses=published')
+    assert {p['status'] for p in resp_1.json['data']} <= {'published', 'pinned'}
+    assert {p['status'] for p in resp_2.json['data']} <= {'published'}
 
 
 def test_client_can_get_topic(client, topic_id):

@@ -309,6 +309,28 @@ def test_client_corretly_gets_topics_by_newest_last_post(
     assert resp_4.json['data'][1]['topic_id'] == str(topic_id_1)
 
 
+def test_client_filter_topics_by_statuses(admin_with_tok, client, subforum_id):
+    admin_with_tok.post('/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'hey',
+            'status': 'published',
+        }
+    )
+    admin_with_tok.post('/api/subforums/{}/topics'.format(subforum_id),
+        data={
+            'title': 'hey2',
+            'status': 'pinned',
+        }
+    )
+    resp_1 = client.get(
+        '/api/subforums/{}/topics?statuses=published,pinned'.format(
+            subforum_id))
+    resp_2 = client.get('/api/subforums/{}/topics?statuses=pinned'.format(
+        subforum_id))
+    assert {p['status'] for p in resp_1.json['data']} <= {'published', 'pinned'}
+    assert {p['status'] for p in resp_2.json['data']} <= {'pinned'}
+
+
 def test_logged_in_client_under_antiflood_cannot_post_in_interval(
         client_with_tok_under_antifloood, antiflood_time, subforum_id):
     time.sleep(antiflood_time)
@@ -329,4 +351,3 @@ def test_logged_in_client_under_antiflood_cannot_post_in_interval(
     assert end_time - start_time < antiflood_time
     assert resp_1.status_code == 200
     assert resp_2.status_code == 429
-
