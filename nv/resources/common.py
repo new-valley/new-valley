@@ -8,7 +8,7 @@ from webargs.fields import (
 from marshmallow import (
     ValidationError,
 )
-from sqlalchemy import exc, desc
+from sqlalchemy import exc, desc, select, func
 from webargs import validate
 from nv.models import (
     User,
@@ -98,8 +98,9 @@ def order_query(query, by='newest', date_field='created_at'):
 
 def order_topics(query, by='newest_last_post'):
     if by == 'newest_last_post':
-        query = query.outerjoin(Topic.posts).order_by(desc(Post.created_at))
-        query = query.distinct(Topic.topic_id)
+        sel = select([func.max(Post.created_at)])
+        scalar = sel.where(Post.topic_id == Topic.topic_id).as_scalar()
+        query = query.order_by(scalar.desc())
         by = None
     return order_query(query, by=by)
 
