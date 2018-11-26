@@ -62,8 +62,16 @@ def _is_active_topic_author(user, topic):
     return _is_active(user) and _is_topic_author(user, topic)
 
 
+def _is_pinned(topic):
+    return topic is not None and topic.status == 'pinned'
+
+
 def _is_published(topic_or_post):
     return topic_or_post is not None and topic_or_post.status == 'published'
+
+
+def _is_postable(topic):
+    return _is_pinned(topic) or _is_published(topic)
 
 
 class Permission:
@@ -157,7 +165,7 @@ class EditTopic(EditTarget):
         if not _is_active(user):
             return False
         elif _is_topic_author(user, self.target):
-            return _is_published(self.target)
+            return _is_postable(self.target)
         else:
             return _is_admin_or_moderator(user)
 
@@ -177,7 +185,7 @@ class CreatePostInTopic(CreateInTarget):
         if not _is_active(user):
             return False
         else:
-            return _is_published(self.target) or _is_admin_or_moderator(user)
+            return _is_postable(self.target) or _is_admin_or_moderator(user)
 
 
 class EditPost(EditTarget):

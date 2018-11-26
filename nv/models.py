@@ -94,6 +94,8 @@ class Topic(Base):
         'published',
         'unpublished',
         'locked',
+        'pinned',
+        'pinned-locked',
     }
 
     __tablename__ = 'topics'
