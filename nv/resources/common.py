@@ -137,7 +137,6 @@ def generic_put(obj, schema, data):
 
 
 def generic_delete(obj):
-    print('obj:', obj)
     if obj is None:
         return mk_errors(404, 'element does not exist')
     db.session.delete(obj)
