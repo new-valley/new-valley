@@ -18,7 +18,7 @@ from nv.models import (
     Topic
 )
 from nv.database import db
-from nv.util import get_datetime, flatten
+from nv.util import get_datetime, flatten, generate_hash
 from flask import current_app
 import os
 import json
@@ -81,6 +81,8 @@ def deserialize(data, model_cls=None):
             new_dct[k] = int(v)
         elif k.endswith('_at'):
             new_dct[k] = get_datetime(v)
+        elif k == 'password':
+            new_dct[k] = generate_hash(v)
         else:
             new_dct[k] = str(v)
     obj = new_dct if model_cls is None else model_cls(**new_dct)
