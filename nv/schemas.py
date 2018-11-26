@@ -22,6 +22,7 @@ from marshmallow.fields import (
     DateTime,
     Integer,
 )
+from sqlalchemy import desc
 from nv.database import db
 from nv.models import (
     Avatar,
@@ -172,6 +173,7 @@ class TopicSchema(ModelSchema):
     subforum = Nested(
         SubforumSchema, many=False, dump_only=True)
     n_posts = Integer(dump_only=True)
+    last_post = Nested('PostSchema', many=False, dump_only=True, missing=None)
     created_at = LocalizedDateTime(dump_only=True)
     updated_at = LocalizedDateTime(dump_only=True)
 
@@ -185,6 +187,15 @@ class TopicSchema(ModelSchema):
         if 'topic_id' in data:
             n_posts = Post.query.filter_by(topic_id=data['topic_id']).count()
             data['n_posts'] = n_posts
+        return data
+
+    @post_dump
+    def set_last_post(self, data):
+        if 'topic_id' in data:
+            query = Post.query.filter_by(topic_id=data['topic_id'])
+            query = query.order_by(desc('created_at'))
+            last_post = query.first()
+            data['last_post'] = PostSchema(exclude=['topic']).dump(last_post)
         return data
 
     class Meta:
