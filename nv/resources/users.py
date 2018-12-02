@@ -33,6 +33,7 @@ from nv.resources.common import (
 from nv.permissions import (
     DeleteUser,
     EditUser,
+    CreateUser,
 )
 from nv.database import db
 
@@ -52,6 +53,7 @@ class UsersRes(Resource):
         #default avatar to be chosen
         if not 'avatar_id' in data:
             data['avatar_id'] = Avatar.query.first().avatar_id
+        CreateUser(attributes=set(data.keys())).check(None)
         ret = generic_post(
             schema=UserSchema(),
             data=data,

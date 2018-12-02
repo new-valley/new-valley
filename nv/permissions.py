@@ -105,9 +105,21 @@ class CreateInTarget(PermissionOnTarget):
     pass
 
 
+_USER_PARAMS_ONLY_FOR_ADMIN = {
+    'created_at',
+    'roles',
+    'status',
+    'n_posts',
+    'n_topics',
+}
+
+
 class CreateUser(Permission):
-    def is_granted(self, user):
-        return True
+    def __init__(self, attributes):
+        self.attributes = attributes
+
+    def is_granted(self, user=None):
+        return not _USER_PARAMS_ONLY_FOR_ADMIN & self.attributes
 
 
 class EditUser(EditTarget):
@@ -115,7 +127,7 @@ class EditUser(EditTarget):
         if not _is_active(user):
             return False
         elif _same_users(user, self.target):
-            return not {'created_at', 'roles', 'status'} & self.attributes
+            return not _USER_PARAMS_ONLY_FOR_ADMIN & self.attributes
         else:
             return _is_admin(user)
 

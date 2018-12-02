@@ -81,7 +81,7 @@ class UserSchema(ModelSchema):
     signature = field_for(User, 'signature', required=False)
     n_posts = field_for(User, 'n_posts')
     n_topics = field_for(User, 'n_topics')
-    created_at = LocalizedDateTime(dump_only=True)
+    created_at = LocalizedDateTime(required=False)
     updated_at = LocalizedDateTime(dump_only=True)
 
     @validates('password')
